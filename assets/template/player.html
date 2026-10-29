@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HTML 动画视频播放器</title>
+  <link rel="stylesheet" href="player.css">
+</head>
+<body>
+  <main class="preview-shell">
+    <div class="phone">
+      <svg id="scene" viewBox="0 0 1080 1920" role="img" aria-label="HTML 动画视频预览">
+        <defs>
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#102a22" flood-opacity=".18"/></filter>
+        </defs>
+        <rect id="paper" width="1080" height="1920" fill="#f4f0e6"/>
+        <g id="grid"/>
+        <g id="sceneRoot"/>
+      </svg>
+      <div id="subtitle" class="subtitle"></div>
+    </div>
+    <audio id="audio" preload="auto"></audio>
+    <div class="controls">
+      <button id="playButton" type="button">播放</button>
+      <input id="seek" type="range" min="0" max="1000" value="0" aria-label="播放进度">
+      <span id="timeLabel" class="time">00:00 / 00:00</span>
+    </div>
+  </main>
+  <script src="subs.js"></script>
+  <script src="scenes.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>
