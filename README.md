@@ -1,4 +1,4 @@
-# HTML Animation Video Skill
+# Cheese Animation Video Skill
 
 将口播稿、配音和 SRT 字幕转化为可定格、可复用、可自动 QA 的 HTML/SVG 动画视频。
 
@@ -35,7 +35,7 @@
 
 ```bash
 mkdir -p .agents/skills
-git clone https://github.com/MarkCheese523/html-animation-video.git .agents/skills/html-animation-video
+git clone https://github.com/MarkCheese523/cheese_animation_video.git .agents/skills/html-animation-video
 ```
 
 重新打开会话，让客户端重新扫描技能。
@@ -236,3 +236,7 @@ SCENE_BUILDERS.myAction = (scene, api) => {
 ```
 
 逐帧采集，再使用 ffmpeg 合成帧序列与音频。导出后仍需检查分辨率、帧率、总时长、音轨、场景接缝和首中尾帧。
+
+## 二次开发
+
+贡献流程、分支约定、回归要求和发布步骤见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。提交 Pull Request 时请按模板填写测试与视觉验证结果。
