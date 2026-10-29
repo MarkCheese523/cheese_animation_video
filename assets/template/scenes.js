@@ -96,7 +96,7 @@ const SCENE_BUILDERS = {
     const items = p.items.map((label, index) => {
       const group = api.el('g', {});
       api.el('rect', { x: 150, y: 360 + index * 280, width: 780, height: 190, rx: 28, fill: index % 2 ? '#c6ff3d' : '#fffdf7', stroke: '#102a22', 'stroke-width': 5 }, group);
-      api.text(label, { x: 540, y: 480 + index * 280, 'text-anchor': 'middle', class: 'mg-text', 'font-size': 68, fill: '#102a22' }, group);
+      api.text(label, { x: 540, y: 480 + index * 280, 'text-anchor': 'middle', class: 'mg-text', 'font-size': 68, fill: '#102a22', 'data-on-accent': index % 2 ? 'true' : 'false' }, group);
       return group;
     });
     return t => {
@@ -106,6 +106,94 @@ const SCENE_BUILDERS = {
         api.opacity(group, api.clamp(enter));
         group.setAttribute('transform', `translate(0 ${api.mix(90, 0, enter)})`);
       });
+    };
+  },
+
+  procession: (scene, api) => {
+    const p = scene.props;
+    const header = api.header(scene, p.label);
+    const number = api.text(String(p.multiplier || 5), { x: 78, y: 450, class: 'mg-num', 'font-size': 190, 'font-weight': 900, fill: '#c6ff3d' });
+    const times = api.text('×', { x: 270, y: 440, class: 'mg-num', 'font-size': 72, 'font-weight': 800, fill: '#c6ff3d' });
+    const metric = api.text(p.metric || '', { x: 390, y: 405, class: 'mg-text', 'font-size': 38, 'font-weight': 700, fill: 'var(--ink)' });
+    const lanes = api.el('g', {});
+    api.el('path', { d: 'M0 720L1080 420V790L0 1260Z', fill: '#fffdf7', opacity: .1 }, lanes);
+    api.el('path', { d: 'M0 1370L1080 690V1050L0 1920Z', fill: '#fffdf7', opacity: .08 }, lanes);
+    const speedLines = api.el('g', { stroke: '#c6ff3d', 'stroke-width': 10, 'stroke-linecap': 'round', opacity: .42 }, lanes);
+    [[30, 1370, 310, 1240], [390, 1570, 760, 1410], [720, 1160, 1040, 1030], [40, 1020, 230, 950], [760, 690, 1040, 610]].forEach(([x1, y1, x2, y2]) => {
+      api.el('line', { x1, y1, x2, y2 }, speedLines);
+    });
+
+    function human(parent) {
+      const group = api.el('g', {}, parent);
+      const leftLeg = api.el('path', { d: 'M-12-48L-22 12L-38 66', fill: 'none', stroke: '#d8d6c7', 'stroke-width': 24, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, group);
+      const rightLeg = api.el('path', { d: 'M12-48L24 10L40 62', fill: 'none', stroke: '#d8d6c7', 'stroke-width': 24, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, group);
+      const leftArm = api.el('path', { d: 'M-24-104L-48-52L-58-12', fill: 'none', stroke: '#d8d6c7', 'stroke-width': 19, 'stroke-linecap': 'round' }, group);
+      const rightArm = api.el('path', { d: 'M24-104L48-56L58-18', fill: 'none', stroke: '#d8d6c7', 'stroke-width': 19, 'stroke-linecap': 'round' }, group);
+      api.el('path', { d: 'M-24-116Q0-132 24-116L31-46Q0-28-31-46Z', fill: '#d8d6c7' }, group);
+      api.el('circle', { cx: 0, cy: -157, r: 29, fill: '#d8d6c7' }, group);
+      return { group, leftLeg, rightLeg, leftArm, rightArm };
+    }
+
+    function robot(parent) {
+      const group = api.el('g', {}, parent);
+      const leftLeg = api.el('path', { d: 'M-24-5L-30 42L-48 72', fill: 'none', stroke: '#c6ff3d', 'stroke-width': 25, 'stroke-linecap': 'square', 'stroke-linejoin': 'round' }, group);
+      const rightLeg = api.el('path', { d: 'M24-5L32 40L50 68', fill: 'none', stroke: '#c6ff3d', 'stroke-width': 25, 'stroke-linecap': 'square', 'stroke-linejoin': 'round' }, group);
+      const leftArm = api.el('path', { d: 'M-52-68L-76-28L-68 12', fill: 'none', stroke: '#c6ff3d', 'stroke-width': 19, 'stroke-linecap': 'square', 'stroke-linejoin': 'round' }, group);
+      const rightArm = api.el('path', { d: 'M52-68L76-30L68 10', fill: 'none', stroke: '#c6ff3d', 'stroke-width': 19, 'stroke-linecap': 'square', 'stroke-linejoin': 'round' }, group);
+      api.el('rect', { x: -48, y: -82, width: 96, height: 86, rx: 8, fill: '#c6ff3d' }, group);
+      api.el('rect', { x: -55, y: -174, width: 110, height: 82, rx: 10, fill: '#c6ff3d' }, group);
+      api.el('rect', { x: -37, y: -156, width: 74, height: 43, rx: 4, fill: 'var(--paper)' }, group);
+      api.el('circle', { cx: -57, cy: -133, r: 10, fill: '#c6ff3d' }, group);
+      api.el('circle', { cx: 57, cy: -133, r: 10, fill: '#c6ff3d' }, group);
+      return { group, leftLeg, rightLeg, leftArm, rightArm };
+    }
+
+    const humanBases = [
+      { x: 900, y: 620, s: .42 }, { x: 760, y: 655, s: .52 }, { x: 610, y: 690, s: .63 },
+      { x: 450, y: 730, s: .76 }, { x: 280, y: 770, s: .91 }, { x: 100, y: 820, s: 1.08 },
+    ];
+    const robotBases = [
+      { x: 1000, y: 850, s: .3 }, { x: 920, y: 900, s: .36 }, { x: 840, y: 950, s: .42 },
+      { x: 750, y: 1000, s: .49 }, { x: 650, y: 1060, s: .57 }, { x: 540, y: 1120, s: .66 },
+      { x: 420, y: 1190, s: .76 }, { x: 290, y: 1260, s: .88 }, { x: 140, y: 1340, s: 1.02 },
+    ];
+    const humans = humanBases.map(base => ({ ...base, ...human(lanes) }));
+    const robots = robotBases.map(base => ({ ...base, ...robot(lanes) }));
+    const caption = api.text(p.caption || '', { x: 90, y: 1690, class: 'mg-text', 'font-size': 48, 'font-weight': 700, fill: 'var(--ink)' });
+    const captionRule = api.el('line', { x1: 60, y1: 1630, x2: 60, y2: 1710, stroke: '#c6ff3d', 'stroke-width': 9 });
+
+    return t => {
+      api.opacity(header, api.prog(t, 0, .4));
+      const numberEnter = api.out(api.prog(t, .15, .8));
+      api.opacity(number, numberEnter);
+      api.opacity(times, numberEnter);
+      api.opacity(metric, api.prog(t, .45, 1));
+      const march = t * 5.2;
+      humans.forEach((figure, index) => {
+        const step = Math.sin(march + index * .75);
+        figure.group.setAttribute('transform', `translate(${figure.x + t * 7} ${figure.y - t * 1.8}) scale(${figure.s})`);
+        figure.leftLeg.setAttribute('transform', `rotate(${step * 13} -12 -48)`);
+        figure.rightLeg.setAttribute('transform', `rotate(${-step * 13} 12 -48)`);
+        figure.leftArm.setAttribute('transform', `rotate(${-step * 10} -24 -104)`);
+        figure.rightArm.setAttribute('transform', `rotate(${step * 10} 24 -104)`);
+      });
+      robots.forEach((figure, index) => {
+        const order = robots.length - index - 1;
+        const start = .65 + order * .19;
+        const enter = api.back(api.prog(t, start, start + .55));
+        const step = Math.sin(march + index * .7);
+        const visibleScale = figure.s * Math.max(0, enter);
+        figure.group.setAttribute('transform', `translate(${figure.x + t * 5} ${figure.y - t * 1.4}) scale(${visibleScale})`);
+        api.opacity(figure.group, api.clamp(enter));
+        figure.leftLeg.setAttribute('transform', `rotate(${step * 9} -24 -5)`);
+        figure.rightLeg.setAttribute('transform', `rotate(${-step * 9} 24 -5)`);
+        figure.leftArm.setAttribute('transform', `rotate(${-step * 8} -52 -68)`);
+        figure.rightArm.setAttribute('transform', `rotate(${step * 8} 52 -68)`);
+      });
+      speedLines.setAttribute('transform', `translate(${(t * 28) % 140} ${-(t * 28) % 140 * .35})`);
+      const captionEnter = api.prog(t, (scene.timing.caption || 3000) / 1000, (scene.timing.caption || 3000) / 1000 + .6);
+      api.opacity(caption, captionEnter);
+      api.opacity(captionRule, captionEnter);
     };
   },
 

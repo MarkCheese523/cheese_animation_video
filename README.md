@@ -23,6 +23,7 @@
 | `flow` | 流程、因果链、资源流和机制连接 |
 | `compare` | 前后对比、双方差异、两组数据 |
 | `reveal` | 关键词和少量并列信息逐步出现 |
+| `procession` | 无五官人物与机器人队列、劳动结构和规模变化 |
 | `end` | 结论、金句和收尾落版 |
 
 所有场景均由 `render(t)` 确定性渲染，任意跳转到同一时刻都会得到相同画面。
@@ -75,16 +76,27 @@ python -m pip install Pillow
 
 ## 快速开始
 
-### 1. 初始化一期视频
+### 1. 选择风格并初始化一期视频
 
-进入技能目录：
+进入技能目录，启动双风格样例选择页：
 
 ```bash
 cd .agents/skills/html-animation-video
-python scripts/init_project.py /完整路径/my-video --title "我的第一期视频"
+npm --prefix assets/style-selector run dev -- --host 127.0.0.1 --port 7100
 ```
 
-目标目录必须为空或不存在，脚本不会覆盖已有项目。
+打开 `http://127.0.0.1:7100/`。页面提供奶油波普、深色插画叙事各一个 30 秒完整样例，可分别播放并选择。选择结果只保存在当前浏览器，仍需在对话中确认风格后再初始化：
+
+```bash
+python scripts/init_project.py /完整路径/my-video --title "我的第一期视频" --style cream-neon
+```
+
+| `--style` | 展示名称 | 视觉特征 |
+|---|---|---|
+| `cream-neon` | 奶油波普（奶油×荧绿） | 奶油底、墨色文字、荧绿强调 |
+| `dark-narrative` | 深色插画叙事风 | 墨绿底、卡通角色、叙事光效 |
+
+目标目录必须为空或不存在，脚本不会覆盖已有项目。旧项目没有 `style` 字段时按 `cream-neon` 渲染。
 
 ### 2. 准备字幕与配音
 
@@ -108,6 +120,7 @@ python tools/srt_to_subs.py /完整路径/voice.srt
 ```json
 {
   "title": "我的第一期视频",
+  "style": "cream-neon",
   "width": 1080,
   "height": 1920,
   "audio": "assets/voice.mp3",

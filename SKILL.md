@@ -23,6 +23,17 @@ description: 使用 HTML、SVG、CSS 与确定性时间轴制作口播动画、�
 
 收集脚本或口播稿、配音、SRT、画幅、视觉方向和必须出现的产品录屏。缺少非阻塞信息时采用合理默认值；缺少配音或 SRT 时可以先做画面脚本和无声样片，但不要伪造精确对轴。
 
+**需求收集时必须主动让用户选择风格，并展示以下可选项；用户已经指定参考图或风格时可跳过重复询问：**
+
+| style | 展示名称 | 视觉特征 |
+|---|---|---|
+| `cream-neon` | 奶油×荧绿设计风 | 奶油底、墨色文字、荧绿强调、现代编辑感 |
+| `dark-narrative` | 深色插画叙事风 | 墨绿底、浅色文字、荧绿事件元素、冷峻叙事感 |
+
+从技能目录运行 `npm --prefix assets/style-selector run dev -- --host 127.0.0.1 --port 7100`，把选择页交给用户。页面内置两种风格各一个 30 秒完整样例，支持播放、选择和刷新后保留选择。选择结果只存在浏览器中，必须在对话中取得用户确认，再把确认的 ID 写入 `project.json` 的 `style`；不得把网页本地状态当成已经收到选择。
+
+旧项目未配置时按 `cream-neon` 兼容；不得替用户静默切换风格。具体人物、品牌和物品插画仍须经过素材双确认，风格选择不等于素材授权。
+
 先输出逐段画面计划：
 
 | 时段 | 旁白含义 | 可见动作 | 画面信息增量 | 素材 |
@@ -48,7 +59,7 @@ description: 使用 HTML、SVG、CSS 与确定性时间轴制作口播动画、�
 从技能目录运行：
 
 ```bash
-python scripts/init_project.py /absolute/path/to/episode --title "本期标题"
+python scripts/init_project.py /absolute/path/to/episode --title "本期标题" --style dark-narrative
 ```
 
 脚本会复制 `assets/template/` 并安装本期工具。目标目录必须为空或不存在；不要覆盖已有工程。模板不绑定任何人物、品牌或单期内容。

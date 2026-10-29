@@ -130,6 +130,7 @@ async function init() {
   const response = await fetch('project.json');
   if (!response.ok) throw new Error(`project.json 加载失败：${response.status}`);
   project = await response.json();
+  document.body.dataset.style = project.style || 'cream-neon';
   W = project.width || 1080;
   H = project.height || 1920;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);

@@ -6,7 +6,7 @@ import re
 import sys
 from pathlib import Path
 
-BUILTINS = {"counter", "flow", "compare", "reveal", "end"}
+BUILTINS = {"counter", "flow", "compare", "reveal", "procession", "end"}
 
 
 def timing_values(value):
@@ -53,6 +53,8 @@ def main():
         scenes = []
     if not project.get("title"):
         errors.append("title 不能为空")
+    if project.get("style", "cream-neon") not in {"cream-neon", "dark-narrative"}:
+        errors.append("style 必须是 cream-neon 或 dark-narrative")
     for dimension in ("width", "height"):
         if not isinstance(project.get(dimension), (int, float)) or project[dimension] <= 0:
             errors.append(f"{dimension} 必须是正数")
