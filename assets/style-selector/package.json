@@ -1,0 +1,11 @@
+{
+  "name": "html-animation-video-style-selector",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "check": "node --check dev-server.mjs && node --check selector.js",
+    "test": "npm run check && node dev-server.mjs --host 127.0.0.1 --port 7100 --self-test"
+  }
+}

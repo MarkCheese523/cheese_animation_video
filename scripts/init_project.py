@@ -14,6 +14,10 @@ def main():
     parser = argparse.ArgumentParser(description="初始化 HTML 动画视频工程")
     parser.add_argument("target", help="目标目录；必须为空或不存在")
     parser.add_argument("--title", default="HTML 动画视频", help="本期标题")
+    parser.add_argument(
+        "--style", default="cream-neon", choices=("cream-neon", "dark-narrative"),
+        help="视觉风格：cream-neon 奶油荧绿，dark-narrative 深色叙事",
+    )
     args = parser.parse_args()
 
     target = Path(args.target).expanduser().resolve()
@@ -33,6 +37,7 @@ def main():
     project_file = target / "project.json"
     project = json.loads(project_file.read_text(encoding="utf-8"))
     project["title"] = args.title
+    project["style"] = args.style
     project_file.write_text(json.dumps(project, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(f"已初始化：{target}")

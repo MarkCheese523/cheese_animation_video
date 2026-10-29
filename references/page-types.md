@@ -14,6 +14,7 @@
 ```json
 {
   "title": "示例",
+  "style": "dark-narrative",
   "width": 1080,
   "height": 1920,
   "audio": "assets/voice.mp3",
@@ -36,6 +37,7 @@
 }
 ```
 
+- `style`：视觉皮肤，可选 `cream-neon` 或 `dark-narrative`；缺省为 `cream-neon`。
 - `id`：稳定且唯一，只使用字母、数字和连字符。
 - `start`：全片绝对秒数；第一段通常为 0。
 - `duration`：秒；下一段 `start` 必须等于本段 `start + duration`。
@@ -109,6 +111,25 @@
   }
 }
 ```
+
+### procession：人物与机器人队列
+
+适合人机协作、劳动结构、规模变化和两条队列的数量对照。人物使用无五官矢量轮廓，机器人由时间轴控制逐个加入，人物和机器人的四肢均由同一时间函数驱动。
+
+```json
+{
+  "type": "procession",
+  "props": {
+    "label": "劳动结构正在改变",
+    "multiplier": 5,
+    "metric": "AI Agent 工时 ÷ 全员人类工时",
+    "caption": "AI Agent 的工时总量第一次超过人类"
+  },
+  "timing": { "caption": 3000 }
+}
+```
+
+该渲染器只提供通用人形与机器人，不绑定真实人物或品牌；具体人物肖像和品牌资产仍需经过素材双确认。
 
 ### end：结论落版
 

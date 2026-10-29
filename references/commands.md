@@ -7,8 +7,11 @@
 在技能目录：
 
 ```bash
-python scripts/init_project.py /absolute/path/to/episode --title "本期标题"
+python scripts/init_project.py /absolute/path/to/episode --title "本期标题" --style cream-neon
+python scripts/init_project.py /absolute/path/to/episode-dark --title "深色版" --style dark-narrative
 ```
+
+`--style` 可选 `cream-neon`（奶油×荧绿）或 `dark-narrative`（深色插画叙事），默认 `cream-neon`。新一期需求收集时应让用户明确选择，不要代替用户决定。
 
 目标目录必须为空或不存在。脚本复制通用模板，并安装 `tools/` 下的字幕、校验与 QA 脚本。
 

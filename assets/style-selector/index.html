@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f2ee">
+  <title>选择你的视频风格</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="intro">
+      <div class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>STYLE LIBRARY · 01</div>
+      <h1>先选一个，<span>喜欢的表达。</span></h1>
+      <p>两种风格，各一支 30 秒完整样例。播放看看，再决定你的视频长什么样。</p>
+      <div id="selectionStatus" class="selection-status" role="status" aria-live="polite" hidden></div>
+    </header>
+
+    <section class="style-grid" aria-label="可选视频风格">
+      <article class="style-card cream-card" data-style="cream-neon">
+        <div class="card-heading">
+          <div>
+            <span class="style-number">STYLE 01</span>
+            <h2>奶油波普</h2>
+          </div>
+          <span class="selected-badge"><span aria-hidden="true">✓</span> 已选择</span>
+        </div>
+        <p class="style-description">柔软奶油底色，撞上高饱和荧绿。数字、贴纸和弹性动效，让信息轻快又有记忆点。</p>
+        <div class="sample-stage cream-stage">
+          <img class="sample-cover" src="/samples/cream-neon/cover.png" alt="奶油波普风格样例封面：奶油色背景上的荧绿数字动画" width="1080" height="1920">
+          <div class="stage-shade" aria-hidden="true"></div>
+          <button class="cover-play" type="button" data-play="cream-neon" aria-label="播放奶油波普完整样例">
+            <span class="play-icon" aria-hidden="true">▶</span>
+            <span>播放完整样例</span>
+            <span class="duration">00:30</span>
+          </button>
+        </div>
+        <div class="style-tags" aria-label="风格特点"><span>明亮轻快</span><span>高饱和撞色</span><span>弹性动效</span></div>
+        <div class="card-footer">
+          <button class="text-button" type="button" data-play="cream-neon"><span class="play-label">播放样例</span><span aria-hidden="true">↗</span></button>
+          <button class="choose-button cream-choose" type="button" data-choose="cream-neon"><span class="choose-label">选用此风格</span><span aria-hidden="true">→</span></button>
+        </div>
+      </article>
+
+      <article class="style-card dark-card" data-style="dark-narrative">
+        <div class="card-heading">
+          <div>
+            <span class="style-number">STYLE 02</span>
+            <h2>深色插画叙事</h2>
+          </div>
+          <span class="selected-badge"><span aria-hidden="true">✓</span> 已选择</span>
+        </div>
+        <p class="style-description">深邃舞台与 2D 半立体角色相遇。纸盒人、机器人与流动光效，把抽象机制讲成一段故事。</p>
+        <div class="sample-stage dark-stage">
+          <img class="sample-cover" src="/samples/dark-narrative/cover.png" alt="深色插画叙事风格样例封面：卡通纸盒人和机器人行走在深色舞台上" width="1080" height="1920">
+          <div class="stage-shade" aria-hidden="true"></div>
+          <button class="cover-play" type="button" data-play="dark-narrative" aria-label="播放深色插画叙事完整样例">
+            <span class="play-icon" aria-hidden="true">▶</span>
+            <span>播放完整样例</span>
+            <span class="duration">00:30</span>
+          </button>
+        </div>
+        <div class="style-tags" aria-label="风格特点"><span>电影感</span><span>卡通角色</span><span>叙事光效</span></div>
+        <div class="card-footer">
+          <button class="text-button" type="button" data-play="dark-narrative"><span class="play-label">播放样例</span><span aria-hidden="true">↗</span></button>
+          <button class="choose-button dark-choose" type="button" data-choose="dark-narrative"><span class="choose-label">选用此风格</span><span aria-hidden="true">→</span></button>
+        </div>
+      </article>
+    </section>
+
+    <footer class="page-footer"><span>先看感觉，再定风格。</span><span>2 STYLES · 2 COMPLETE DEMOS</span></footer>
+  </main>
+  <script src="selector.js"></script>
+</body>
+</html>

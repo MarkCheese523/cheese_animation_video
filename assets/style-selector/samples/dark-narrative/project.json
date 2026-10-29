@@ -1,0 +1,83 @@
+{
+  "title": "深色插画叙事风",
+  "style": "dark-narrative",
+  "width": 1080,
+  "height": 1920,
+  "audio": "",
+  "scenes": [
+    {
+      "id": "opening",
+      "type": "procession",
+      "start": 0,
+      "duration": 6,
+      "props": {
+        "label": "劳动结构正在改变",
+        "multiplier": 5,
+        "metric": "AI Agent 工时 ÷ 全员人类工时",
+        "caption": "AI Agent 的工时总量第一次超过人类"
+      },
+      "timing": {
+        "caption": 3000
+      }
+    },
+    {
+      "id": "mechanism",
+      "type": "flow",
+      "start": 6,
+      "duration": 6,
+      "props": {
+        "label": "机制按顺序发生",
+        "nodes": [
+          "输入",
+          "处理",
+          "结果"
+        ],
+        "caption": "每一段都由同一个时间轴驱动"
+      },
+      "timing": {
+        "nodes": [
+          0,
+          800,
+          1600
+        ],
+        "caption": 3000
+      }
+    },
+    {
+      "id": "comparison",
+      "type": "compare",
+      "start": 12,
+      "duration": 6,
+      "props": {
+        "label": "两种工作方式",
+        "left": { "title": "之前", "value": 35 },
+        "right": { "title": "之后", "value": 80 },
+        "caption": "变化由同一时间轴呈现"
+      },
+      "timing": {}
+    },
+    {
+      "id": "findings",
+      "type": "reveal",
+      "start": 18,
+      "duration": 6,
+      "props": {
+        "label": "三个结果",
+        "items": ["可见", "可控", "可复用"]
+      },
+      "timing": {}
+    },
+    {
+      "id": "ending",
+      "type": "end",
+      "start": 24,
+      "duration": 6,
+      "props": {
+        "title": "核心结论",
+        "subtitle": "用动作呈现机制，而不是复读字幕",
+        "note": "DARK NARRATIVE"
+      },
+      "timing": {}
+    }
+  ]
+}
