@@ -15,6 +15,25 @@
 
 > 本技能生成的是可交互网页动画和 QA 结果，不是文生视频模型。当前模板不包含开箱即用的 MP4 导出器。
 
+## 风格示例
+
+两种风格各内置一个 30 秒完整网页样例。以下为样例的实际画面，启动方式见[选择风格并初始化一期视频](#1-选择风格并初始化一期视频)。
+
+<table>
+  <tr>
+    <th>奶油波普 · <code>cream-neon</code></th>
+    <th>深色插画叙事 · <code>dark-narrative</code></th>
+  </tr>
+  <tr>
+    <td><img src="assets/style-selector/samples/cream-neon/cover.png" alt="奶油波普样例：奶油色背景、墨色数字与荧绿进度动画" width="320"></td>
+    <td><img src="assets/style-selector/samples/dark-narrative/cover.png" alt="深色插画叙事样例：深色舞台上的卡通纸盒人和机器人队列" width="320"></td>
+  </tr>
+  <tr>
+    <td>奶油纸色、墨色文字、荧绿强调，适合轻快明快的信息表达。</td>
+    <td>卡通角色、电影感舞台、叙事光效，适合抽象机制与故事化表达。</td>
+  </tr>
+</table>
+
 ## 内置场景
 
 | 类型 | 用途 |
