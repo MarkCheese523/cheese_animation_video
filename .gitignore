@@ -16,3 +16,20 @@ studio/generated/
 dark-narrative/
 skill-repo/
 studio/agent-inbox/
+
+# 构建与具体视频案例产物
+dist/
+两段预览/
+assets/candidates/
+assets/library/
+assets/iceland-candidates/
+assets/iceland-library/
+assets/asset-manifest.json
+assets/vo-*.mp3
+/subs.js
+/*确认板.html
+/分镜方案-*.md
+/article-image.png
+/opus-*-research.md
+/research-*.png
+/create_research_visuals.py

@@ -148,16 +148,16 @@ server.listen(port, host, async () => {
   console.log(`网页预览：http://${host}:${port}/`);
   if (selfTest) {
     try {
-      for (const route of ['/', '/studio/', '/assets/template/player.html?scene=motion-study&t=10', '/两段预览/player.html?scene=founders', '/两段预览/player.html?scene=classA', '/两段预览/player.html?scene=all', '/两段预览/player.html?scene=opening', '/两段预览/player.html?scene=control', '/素材确认板.html', '/母版确认板.html']) {
+      for (const route of ['/', '/studio/', '/assets/template/player.html?scene=motion-study&t=10', '/assets/template/player.html?scene=all', '/studio/demo/player.html?scene=all']) {
         const response = await fetch(`http://${host}:${port}${encodeURI(route)}`);
         console.log(`${response.status} ${route}`);
         if (!response.ok) throw new Error(`检查失败：${route}`);
       }
-      const svg = await fetch(`http://${host}:${port}/assets/library/brand-claude/master.svg`);
+      const svg = await fetch(`http://${host}:${port}/studio/demo/component-demo-logo.svg`);
       console.log(`${svg.status} SVG ${svg.headers.get('content-type')}`);
       if (!svg.ok || svg.headers.get('content-type') !== 'image/svg+xml') throw new Error('SVG 素材类型配置异常');
-      const media = await fetch(`http://${host}:${port}/${encodeURI('assets/vo-full.mp3')}`, { headers: { Range: 'bytes=0-99' } });
-      console.log(`${media.status} 媒体 Range 请求`);
+      const media = await fetch(`http://${host}:${port}/studio/demo/assets/walk/human-00.png`, { headers: { Range: 'bytes=0-99' } });
+      console.log(`${media.status} 二进制 Range 请求`);
       if (media.status !== 206) throw new Error('媒体拖动所需 Range 支持异常');
       server.close(() => process.exit(0));
     } catch (error) {
