@@ -2,6 +2,7 @@
   "name": "html-animation-video",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "通用 HTML/SVG 时间轴动画视频工程：Agent 语义拆解、三次素材确认、两段样片闸门、完整网页预览与关键帧 QA。",
   "scripts": {
