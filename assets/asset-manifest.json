@@ -1,0 +1,85 @@
+{
+  "project": "A社的F股",
+  "stage": "master_pending",
+  "assets": [
+    {
+      "asset_id": "person-dario-amodei",
+      "type": "person",
+      "status": "locked",
+      "used_in": ["01", "03", "04", "19", "22", "23"],
+      "candidates": [
+        {"id": "P1-A", "file": "candidates/dario-official.webp", "source": "https://www.anthropic.com/company/leadership", "rights": "Anthropic 官方网页肖像；公开使用许可未明确，暂作风格化参考"},
+        {"id": "P1-B", "file": "candidates/dario-commons.jpg", "source": "https://commons.wikimedia.org/wiki/File:Dario_Amodei_in_2023_(cropped).jpg", "rights": "Open Government Licence v3；需署名并标注修改"}
+      ],
+      "approved_reference": true,
+      "approved_master": true
+    },
+    {
+      "asset_id": "group-anthropic-founders",
+      "type": "people-group",
+      "status": "locked",
+      "used_in": ["04", "19", "22"],
+      "representation": "七位创始人实名文字节点；不合成虚构群像。达里奥使用单独确认的肖像",
+      "source": "https://www.anthropic.com/company/leadership",
+      "approved_reference": true,
+      "approved_master": true
+    },
+    {
+      "asset_id": "brand-claude",
+      "type": "brand",
+      "status": "locked",
+      "used_in": ["01", "03"],
+      "candidates": [
+        {"id": "B1-A", "file": "candidates/claude-symbol.svg", "source": "https://commons.wikimedia.org/wiki/File:Claude_AI_symbol.svg", "rights": "Commons 标注 CC0；商标权仍需遵守"},
+        {"id": "B1-B", "file": "candidates/claude-wordmark.svg", "source": "https://commons.wikimedia.org/wiki/File:Claude_AI_logo.svg", "rights": "Anthropic 商标；保持原始比例"}
+      ],
+      "approved_reference": true,
+      "approved_master": true
+    },
+    {
+      "asset_id": "brand-anthropic",
+      "type": "brand",
+      "status": "locked",
+      "used_in": ["04", "12", "17", "20"],
+      "candidates": [
+        {"id": "B2-A", "file": "candidates/anthropic-wordmark.svg", "source": "https://commons.wikimedia.org/wiki/File:Anthropic_logo.svg", "rights": "Anthropic 商标；保持原始路径与比例"}
+      ],
+      "approved_reference": true,
+      "approved_master": true
+    },
+    {
+      "asset_id": "brand-amazon",
+      "type": "brand",
+      "status": "locked",
+      "used_in": ["15"],
+      "candidates": [
+        {"id": "B3-A", "file": "candidates/amazon-2024.svg", "source": "https://commons.wikimedia.org/wiki/File:Amazon_2024.svg", "rights": "PD-textlogo；商标权仍需遵守"},
+        {"id": "B3-B", "file": "candidates/amazon-2012.svg", "source": "https://commons.wikimedia.org/wiki/File:Amazon_logo.svg", "rights": "2012–2024 旧版；PD-textlogo；商标权仍需遵守"}
+      ],
+      "approved_reference": true,
+      "approved_master": true
+    },
+    {
+      "asset_id": "brand-google",
+      "type": "brand",
+      "status": "locked",
+      "used_in": ["15"],
+      "candidates": [
+        {"id": "B4-A", "file": "candidates/google-2026.svg", "source": "https://commons.wikimedia.org/wiki/File:Google_2026_logo.svg", "rights": "当前版文字标识；商标权仍需遵守"},
+        {"id": "B4-B", "file": "candidates/google-2015.svg", "source": "https://commons.wikimedia.org/wiki/File:Google_2015_logo.svg", "rights": "2015 版文字标识；商标权仍需遵守"}
+      ],
+      "approved_reference": true,
+      "approved_master": true
+    }
+  ],
+  "semantic_assets": [
+    {"asset_id": "person-generic-dots", "choice": "G0-A", "type": "generic-person", "status": "master_pending", "used_in": ["06", "08", "18"], "source": "通用语义资产，无外部肖像参考", "approved_reference": true, "approved_master": false},
+    {"asset_id": "semantic-company-building", "choice": "N1-A", "type": "semantic-object", "status": "master_pending", "used_in": ["04", "08", "19", "22"], "source": "通用公司楼宇，不指向真实建筑", "approved_reference": true, "approved_master": false},
+    {"asset_id": "semantic-institution-building", "choice": "N2-A", "type": "semantic-object", "status": "master_pending", "used_in": ["15", "17"], "source": "通用机构建筑，不指向真实机构地点", "approved_reference": true, "approved_master": false},
+    {"asset_id": "semantic-voting-assembly", "choice": "N3-A", "type": "semantic-action", "status": "master_pending", "used_in": ["06", "18"], "source": "由通用人物派生举手投票动作", "approved_reference": true, "approved_master": false},
+    {"asset_id": "semantic-director-chair", "choice": "N4-A", "type": "semantic-object", "status": "master_pending", "used_in": ["16", "18"], "source": "通用董事座椅，不指向真实家具产品", "approved_reference": true, "approved_master": false}
+  ],
+  "abstract_only": ["钱包", "星期四日历", "股息权", "清算分配权"],
+  "credential_assets": ["股票", "合同", "权利凭证"],
+  "note": "重要名词与通用人物参考方向已确认，风格化母版仍待用户确认；未确认前不锁定资产、不进入分镜或全片返工。钱包和日历若改用具象实物，必须重新进入外部参考确认流程。"
+}

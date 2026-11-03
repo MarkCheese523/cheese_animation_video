@@ -1,0 +1,31 @@
+{
+  "asset_id": "landscape-glacier",
+  "type": "landscape",
+  "status": "master_pending",
+  "version": 1,
+  "selected_option": "L1-A",
+  "source": {
+    "url": "https://commons.wikimedia.org/wiki/File:Eyjafjallaj%C3%B6kull.jpeg",
+    "creator": "Andreas Tille",
+    "license": "CC BY-SA 3.0",
+    "usage_note": "Attribution, indicate changes, share adaptations under the same license."
+  },
+  "reference_file": "reference.jpg",
+  "master_file": "master.png",
+  "identifying_features": [
+    "quiet glacier",
+    "dark rock strata",
+    "ice foreground",
+    "no eruption"
+  ],
+  "approved_reference": true,
+  "approved_master": false,
+  "variants": [
+    "master.png",
+    "variants/ink.png",
+    "variants/outline.png"
+  ],
+  "used_in": [
+    "04-randomness"
+  ]
+}

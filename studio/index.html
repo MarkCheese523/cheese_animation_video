@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Motion Layer · 双轨视频设计台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Motion Layer 首页"><span class="brand-mark">M</span><span>Motion Layer <small>1.0</small></span></a>
+    <div class="top-status"><span class="status-dot"></span>候选方案工作区 <span class="divider">/</span> 未写入正式工程</div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <p class="eyebrow">VIDEO DESIGN WORKFLOW</p>
+      <h1>三次确认，<br>两段样片，再全片。</h1>
+      <p class="intro">沿用原制作链路：分镜、网上参考、重绘母版依次确认，再验收本期视觉开场与核心机制，最后才铺开全片。</p>
+      <nav class="steps" aria-label="制作步骤">
+        <button data-step="direction" class="active"><b>00</b><span>输入方向<small>脚本、产品与风格</small></span></button>
+        <button data-step="motion" disabled><b>01</b><span>分镜确认<small>动作、五拍与节奏</small><em>待确认</em></span></button>
+        <button data-step="elements" disabled><b>02</b><span>找图确认<small>语义、参考与授权</small><em>待确认</em></span></button>
+        <button data-step="redraw" disabled><b>03</b><span>重绘确认<small>参考与风格化母版</small><em>待确认</em></span></button>
+        <button data-step="preview" disabled><b>04</b><span>代表样片<small>视觉开场＋核心机制</small><em>待确认</em></span></button>
+        <button data-step="film" disabled><b>05</b><span>全片预览<small>两段样片确认后解锁</small></span></button>
+      </nav>
+      <div class="sidebar-note">修改上游内容会使下游确认与制作结果失效。两段样片必须分别查看并确认，不能用通用演示或全片代替。</div>
+    </aside>
+
+    <div class="workspace">
+      <section id="direction" class="panel direction-panel" data-page="direction">
+        <div class="section-head"><div><span class="section-number">00</span><h2>这条视频从哪里开始？</h2></div><span class="tag">双轨输入 · 非确认页</span></div>
+        <div class="mode-switch" role="tablist" aria-label="视频方向">
+          <button class="mode active" data-mode="generic" role="tab" aria-selected="true"><span class="mode-icon">✦</span><span><b>没有网页产品</b><small>先探索风格，再检索元素</small></span></button>
+          <button class="mode" data-mode="product" role="tab" aria-selected="false"><span class="mode-icon">⌘</span><span><b>有网页产品</b><small>提取产品风格与真实组件</small></span></button>
+        </div>
+
+        <div id="genericPanel" class="track-panel">
+          <div class="subhead"><h3>选择视觉起点</h3><p>只定视觉语言，不替代具体素材确认。</p></div>
+          <div class="style-grid">
+            <button class="style-card selected" data-style="cream-neon"><span class="style-preview cream"><i></i><b>Aa</b><em></em></span><span><b>奶油 × 荧绿</b><small>编辑感、清晰、富有弹性</small></span><i class="check">✓</i></button>
+            <button class="style-card" data-style="dark-narrative"><span class="style-preview dark"><i></i><b>Aa</b><em></em></span><span><b>深色插画叙事</b><small>2.5D 角色、舞台遮挡、叙事光效</small></span><i class="check">✓</i></button>
+          </div>
+        </div>
+
+        <div id="productPanel" class="track-panel" hidden>
+          <form id="productForm" class="product-form">
+            <label for="productUrl">网页产品地址</label>
+            <div class="url-row"><input id="productUrl" type="url" placeholder="https://your-product.com" required><button class="primary" type="submit">提取产品档案 <span>→</span></button></div>
+            <p class="field-note">读取公开网页的颜色、字体、圆角、组件与资产线索；私有网页可改为提供截图和资源。</p>
+          </form>
+          <div class="product-actions"><button id="demoProduct" class="text-button" type="button">使用虚拟产品演示</button><label class="upload-button">添加产品截图<input id="screenshotInput" type="file" accept="image/*" hidden></label></div>
+          <div id="profileLoading" class="loading" hidden><span></span>正在分析网页风格与组件…</div>
+          <div id="profileError" class="error" hidden></div>
+          <article id="productProfile" class="product-profile" hidden>
+            <div class="profile-main"><div><p class="eyebrow">PRODUCT PROFILE</p><h3 id="profileName"></h3><p id="profileMeta"></p></div><span class="pending-badge">风格输入</span></div>
+            <div id="profileSwatches" class="swatches"></div>
+            <div class="profile-details"><div><small>字体</small><b id="profileFont"></b></div><div><small>圆角</small><b id="profileRadius"></b></div><div><small>组件线索</small><b id="profileComponents"></b></div></div>
+            <img id="screenshotPreview" alt="产品截图预览" hidden>
+          </article>
+        </div>
+        <div class="direction-script"><label class="script-label" for="scriptInput">画面脚本</label><textarea id="scriptInput" rows="5">凭证拆分后可以转让，过期后失效。点击确认，数据同步完成。</textarea><p class="field-note">这里只输入内容；Agent 会在提交后理解语义、拆出分镜和品牌等素材需求。</p></div>
+        <div class="input-grid">
+          <label>画幅<select id="aspectInput"><option value="9:16">9:16 竖屏</option><option value="16:9">16:9 横屏</option><option value="1:1">1:1 方形</option></select></label>
+          <label>补充说明<input id="notesInput" placeholder="必须出现、需要避开或特别强调的内容"></label>
+        </div>
+        <div class="attachment-field"><label for="attachmentInput">本期附件</label><input id="attachmentInput" type="file" multiple accept=".srt,.txt,.md,.json,.mp3,.wav,.m4a,.png,.jpg,.jpeg,.webp,.svg,.mp4,.mov,.webm"><p class="field-note">可一次选择 SRT、配音、截图与录屏；附件随整包交给 Agent。</p><ul id="attachmentList" class="attachment-list"></ul></div>
+        <div id="draftNotice" class="draft-notice" hidden><div><b>发现此浏览器保存的草稿</b><span id="draftNoticeMeta">可继续上次制作进度</span></div><button id="loadDraft" class="secondary" type="button">继续上次草稿 →</button></div>
+        <div class="page-actions"><span>确认整包后，由 Agent 生成实际分镜与素材清单。</span><button id="startMotion" class="primary" type="button">确认输入并交给 Agent <span>→</span></button></div>
+      </section>
+
+      <section id="motion" class="panel" data-page="motion" hidden>
+        <div class="section-head"><div><span class="section-number">01</span><h2>确认 Agent 拆解的分镜</h2></div><span id="motionGate" class="tag gate-tag">确认页 1 / 3 · 待确认</span></div>
+        <div id="agentHandoff" class="agent-handoff" hidden>
+          <div><p class="eyebrow">REAL AGENT HANDOFF</p><h3>整包已保存，等待当前对话 Agent 拆解</h3><p id="agentStatus">复制下面的交接提示，回到当前对话发送一次。不要使用其他模型或本地词表替代。</p></div>
+          <textarea id="agentPrompt" rows="7" readonly></textarea>
+          <button id="copyAgentPrompt" class="secondary" type="button">复制交接提示</button>
+        </div>
+        <div id="agentAnalysis" hidden>
+          <div class="agent-analysis-summary"><span class="status-dot"></span><p id="analysisSummary">Agent 拆解已回写。</p></div>
+          <div class="option-grid">
+            <div id="fidelityGroup" class="option-block" hidden><h3>产品表达方式</h3><div class="segmented" data-setting="fidelity"><button data-value="faithful">原界面</button><button class="active" data-value="component">组件级重绘</button><button data-value="abstract">品牌化抽象</button></div></div>
+            <div class="option-block"><h3>运动强度</h3><div class="segmented" data-setting="intensity"><button data-value="subtle">克制</button><button class="active" data-value="balanced">均衡</button><button data-value="showreel">强展示</button></div></div>
+          </div>
+          <div class="motion-rule"><div><span>主动作</span><b>来自本期脚本</b></div><i>＋</i><div><span>素材</span><b>由 Agent 自动识别</b></div><i>＋</i><div><span>节奏</span><b>时长连续衔接</b></div></div>
+          <div class="beat-editor"><div class="beat-editor-head"><div><h3>本期分镜</h3><p>先确认动作与素材语义；确认后按 Agent 返回的检索方向自动找图。</p></div><span id="beatTotal"></span></div><div id="beatRows" class="beat-rows"></div></div>
+        </div>
+        <div class="page-actions"><button class="text-button" data-go="direction" type="button">← 返回输入</button><button id="confirmMotion" class="primary" type="button" disabled>确认分镜，进入找图 <span>→</span></button></div>
+      </section>
+
+      <section id="elements" class="panel" data-page="elements" hidden>
+        <div class="section-head"><div><span class="section-number">02</span><h2>确认网上参考与元素</h2></div><span id="referenceGate" class="tag gate-tag">确认页 2 / 3 · 待确认</span></div>
+        <div class="reference-notice"><p><b>素材需求已由 Agent 从脚本自动拆出。</b>这里只确认候选大图、动作、检索词、拟保留特征与来源授权；品牌只使用真实资产或纯文字，不用近似图形替代。</p></div>
+        <div id="elementSlots" class="element-slots"><div class="empty-state"><span>⌁</span><p>确认分镜后，Agent 提取的素材需求与候选参考会一起出现在这里。</p></div></div>
+        <div class="confirmation-sheet"><button id="buildReferenceSheet" class="secondary" type="button" disabled>生成参考确认单</button><pre id="referenceSheet">先检查默认推荐或改选候选，再生成明确确认单。</pre></div>
+        <div class="page-actions"><button class="text-button" data-go="motion" type="button">← 返回分镜</button><span id="referenceProgress">请先为每个元素选择参考</span><button id="confirmReferences" class="primary" type="button" disabled>确认参考，进入重绘 <span>→</span></button></div>
+      </section>
+
+      <section id="redraw" class="panel" data-page="redraw" hidden>
+        <div class="section-head"><div><span class="section-number">03</span><h2>确认重绘母版</h2></div><span id="masterGate" class="tag gate-tag">确认页 3 / 3 · 待确认</span></div>
+        <div class="redraw-intro"><p>参考确认后，由 Agent 真实绘制风格化母版与变体。左侧是已确认参考，右侧是 Agent 回写文件；不再用本地 CSS 滤镜代替重绘。</p><span>REFERENCE → AGENT MASTER</span></div>
+        <div id="masterHandoff" class="agent-handoff production-handoff" hidden>
+          <div><p class="eyebrow">MASTER-REDRAW AGENT HANDOFF</p><h3>等待 Agent 绘制本期风格化母版</h3><p id="masterStatus">复制交接提示到当前对话。真实母版回写前，不会显示伪造对照图，也不能确认母版。</p></div>
+          <textarea id="masterPrompt" rows="9" readonly></textarea>
+          <button id="copyMasterPrompt" class="secondary" type="button">复制重绘交接提示</button>
+        </div>
+        <div id="masterList" class="master-list"></div>
+        <div class="page-actions"><button class="text-button" data-go="elements" type="button">← 返回找图</button><span id="masterProgress">对照检查轮廓、比例与识别特征</span><button id="confirmMasters" class="primary" type="button">确认全部母版，进入两段样片 <span>→</span></button></div>
+      </section>
+
+      <section id="preview" class="panel preview-panel" data-page="preview" hidden>
+        <div class="section-head"><div><span class="section-number">04</span><h2>本期视觉开场＋核心机制</h2></div><span id="sampleGate" class="tag gate-tag">代表样片 · 待制作</span></div>
+        <div class="production-intro"><p>这里不再生成通用五拍演示。Agent 根据本期分镜、Product Profile 与已确认资产形成 design brief，只制作两段可播放的真实网页样片。</p><span>OPENING ＋ MECHANISM</span></div>
+        <div id="selectionSummary" class="selection-summary"></div>
+        <div id="samplePlan" class="sample-plan"></div>
+        <div id="sampleHandoff" class="agent-handoff production-handoff" hidden>
+          <div><p class="eyebrow">TWO-SAMPLE AGENT HANDOFF</p><h3>等待 Agent 制作本期两段代表样片</h3><p id="sampleStatus">复制交接提示到当前对话。回写前不会显示播放器，也不能确认样片。</p></div>
+          <textarea id="samplePrompt" rows="8" readonly></textarea>
+          <button id="copySamplePrompt" class="secondary" type="button">复制样片交接提示</button>
+        </div>
+        <section id="sampleBrief" class="design-brief" hidden><p class="eyebrow">DESIGN BRIEF</p><div id="sampleBriefContent"></div></section>
+        <div id="sampleWorkspace" class="sample-workspace" hidden>
+          <div class="sample-tabs" role="tablist" aria-label="代表样片"><button data-sample="opening" role="tab">01 · 视觉开场<small>未查看</small></button><button data-sample="mechanism" role="tab">02 · 核心机制<small>未查看</small></button></div>
+          <div class="sample-stage"><div class="video-frame"><iframe id="sampleFrame" title="本期代表样片"></iframe></div><aside class="sample-meta"><p class="eyebrow">CURRENT SAMPLE</p><h3 id="sampleTitle"></h3><p id="sampleNarration"></p><dl><div><dt>来源拍点</dt><dd id="sampleSource"></dd></div><div><dt>时长</dt><dd id="sampleDuration"></dd></div><div><dt>调用资产</dt><dd id="sampleAssets"></dd></div></dl><p id="sampleQa" class="sample-qa"></p></aside></div>
+        </div>
+        <div class="page-actions"><button class="text-button" data-go="redraw" type="button">← 返回母版确认</button><span id="sampleProgress">生成后请分别打开两段样片检查</span><button id="saveDraft" class="secondary" type="button">保存草稿</button><button id="generateSamples" class="primary" type="button">生成两段真实样片 <span>→</span></button><button id="confirmSamples" class="primary" type="button" disabled>确认两段样片，进入全片 <span>→</span></button></div>
+        <p id="saveStatus" class="save-status" aria-live="polite"></p>
+      </section>
+
+      <section id="film" class="panel preview-panel" data-page="film" hidden>
+        <div class="section-head"><div><span class="section-number">05</span><h2>沿用已确认语言，生成本期全片</h2></div><span class="tag confirmed-tag">两段样片已确认</span></div>
+        <div class="production-intro"><p>Agent 复用同一份 design brief、母版和样片动效语言，按本期脚本与 SRT 铺开连续时间轴。这里只交付完整网页预览，不导出 MP4。</p><span>FULL WEB FILM</span></div>
+        <div id="filmHandoff" class="agent-handoff production-handoff" hidden>
+          <div><p class="eyebrow">FULL-FILM AGENT HANDOFF</p><h3>等待 Agent 回写完整网页预览</h3><p id="filmStatus">复制交接提示到当前对话；全片结果回写后自动显示。</p></div>
+          <textarea id="filmPrompt" rows="8" readonly></textarea>
+          <button id="copyFilmPrompt" class="secondary" type="button">复制全片交接提示</button>
+        </div>
+        <div id="filmWorkspace" class="film-workspace" hidden><div class="video-frame"><iframe id="filmFrame" title="本期完整网页预览"></iframe></div><div id="filmResultSummary" class="film-result-summary"></div></div>
+        <div class="page-actions"><button class="text-button" data-go="preview" type="button">← 返回两段样片</button><span id="filmProgress">全片任务已携带两段样片确认状态</span><button id="generateFilm" class="primary" type="button">生成本期完整网页预览 <span>→</span></button></div>
+      </section>
+    </div>
+  </main>
+  <script src="../asset-board.js"></script>
+  <script src="../两段预览/semantic-assets.js"></script>
+  <script src="element-research.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

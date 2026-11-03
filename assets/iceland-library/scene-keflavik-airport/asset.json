@@ -1,0 +1,30 @@
+{
+  "asset_id": "scene-keflavik-airport",
+  "type": "scene",
+  "status": "master_pending",
+  "version": 1,
+  "selected_option": "S2-A",
+  "source": {
+    "url": "https://commons.wikimedia.org/wiki/File:Keflav%C3%ADk_Airport_interior_2018.jpg",
+    "creator": "Antony-22",
+    "license": "CC BY-SA 4.0",
+    "usage_note": "Attribution, indicate changes, share adaptations under the same license."
+  },
+  "reference_file": "reference.jpg",
+  "master_file": "master.png",
+  "identifying_features": [
+    "geometric ceiling grid",
+    "central aisle",
+    "rows of seats"
+  ],
+  "approved_reference": true,
+  "approved_master": false,
+  "variants": [
+    "master.png",
+    "variants/ink.png",
+    "variants/outline.png"
+  ],
+  "used_in": [
+    "02-arrival"
+  ]
+}

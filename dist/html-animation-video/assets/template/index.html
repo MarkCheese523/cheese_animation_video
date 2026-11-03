@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HTML 动画视频</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f4f0e6;color:#102a22;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}header{padding:24px clamp(18px,3vw,46px) 18px}h1{margin:0;font-size:clamp(25px,3vw,42px)}header p{margin:8px 0 0;color:#52635c;line-height:1.6}.frame{margin:0 clamp(18px,3vw,46px) 32px;background:#fffdf7;border:2px solid #102a22;border-radius:22px;overflow:hidden;box-shadow:7px 7px 0 #102a22}.frame iframe{display:block;width:100%;height:min(84vh,980px);border:0;background:#101a16}
+  </style>
+</head>
+<body>
+  <header><h1 id="title">HTML 动画视频</h1><p>确定性 HTML/SVG 时间轴 · 网页预览与关键帧 QA</p></header>
+  <main class="frame"><iframe src="player.html?scene=all" title="视频预览"></iframe></main>
+  <script>fetch('project.json').then(response=>response.json()).then(project=>{document.title=project.title;document.getElementById('title').textContent=project.title}).catch(()=>{});</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "title": "深色插画叙事 · 2.5D 演示",
+  "width": 1080,
+  "height": 1920,
+  "audio": "",
+  "scenes": [
+    {
+      "id": "motion-study",
+      "type": "darkNarrativeSequence",
+      "start": 0,
+      "duration": 20,
+      "props": {
+        "profile": {
+          "source": "demo",
+          "name": "DARK NARRATIVE",
+          "tokens": {
+            "accent": "#c6ff3d",
+            "background": "#071b15",
+            "ink": "#eff5e7"
+          }
+        }
+      },
+      "timing": {}
+    }
+  ]
+}

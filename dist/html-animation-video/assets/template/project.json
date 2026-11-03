@@ -1,0 +1,41 @@
+{
+  "title": "HTML 动画视频",
+  "width": 1080,
+  "height": 1920,
+  "audio": "",
+  "scenes": [
+    {
+      "id": "opening",
+      "type": "counter",
+      "start": 0,
+      "duration": 6,
+      "props": {
+        "label": "让变化真正可见",
+        "from": 0,
+        "to": 50.1,
+        "suffix": "%",
+        "caption": "数字只是结果，越线才是动作"
+      },
+      "timing": {
+        "label": 0,
+        "value": 600,
+        "caption": 3200
+      }
+    },
+    {
+      "id": "mechanism",
+      "type": "flow",
+      "start": 6,
+      "duration": 6,
+      "props": {
+        "label": "机制按顺序发生",
+        "nodes": ["输入", "处理", "结果"],
+        "caption": "每一段都由同一个时间轴驱动"
+      },
+      "timing": {
+        "nodes": [0, 800, 1600],
+        "caption": 3000
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "html-animation-video-episode",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "check": "node --check dev-server.mjs && node --check player.js && node --check scenes.js && node --check subs.js",
+    "test": "npm run check && node dev-server.mjs --host 127.0.0.1 --port 7100 --self-test",
+    "validate": "python tools/validate_project.py",
+    "qa": "python tools/qa_frames.py"
+  }
+}

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A社的F股 · 风格化母版确认板</title>
+<style>
+:root{--paper:#f4f0e6;--card:#fffdf7;--ink:#102a22;--muted:#617068;--green:#c6ff3d;--coral:#ff6b57;--line:#102a2226;--soft:#e8e3d7}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}header{padding:46px clamp(20px,5vw,70px) 30px;border-bottom:2px solid var(--ink);display:flex;justify-content:space-between;gap:24px;align-items:end}h1{font-size:clamp(30px,4.5vw,58px);line-height:1.05;margin:0 0 12px;letter-spacing:-.04em}header p{margin:0;color:var(--muted);line-height:1.7}.stage{flex:none;background:var(--coral);border:2px solid var(--ink);padding:10px 16px;border-radius:99px;font-weight:850;letter-spacing:.04em}.notice{margin:26px clamp(20px,5vw,70px);padding:18px 22px;background:var(--ink);color:var(--paper);border-radius:16px;line-height:1.75}.notice b{color:var(--green)}main{padding:0 clamp(20px,5vw,70px) 60px;display:grid;gap:26px}.asset{background:var(--card);border:2px solid var(--ink);border-radius:24px;overflow:hidden;box-shadow:7px 7px 0 var(--ink)}.asset-head{display:flex;gap:16px;align-items:start;padding:24px 26px 18px;border-bottom:1px solid var(--line)}.id{font:800 14px ui-monospace,monospace;background:var(--ink);color:var(--green);padding:6px 9px;border-radius:7px;flex:none}.asset h2{font-size:23px;margin:0 0 7px}.asset-head p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}.compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.panel{min-width:0;padding:22px 26px 26px;border-right:1px solid var(--line)}.panel:last-child{border-right:0}.panel-label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:13px;font-weight:800;letter-spacing:.04em}.tag{font:700 11px ui-monospace,monospace;color:var(--muted);border:1px solid var(--line);padding:4px 7px;border-radius:99px}.visual{height:340px;border:1px solid var(--line);border-radius:16px;background:var(--soft);display:grid;place-items:center;overflow:hidden}.visual img{display:block;width:100%;height:100%;object-fit:contain}.visual.portrait img{object-fit:cover}.panel h3{font-size:17px;margin:16px 0 7px}.panel p{font-size:13px;color:var(--muted);line-height:1.65;margin:0}.founders{padding:26px;display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:12px}.founder{position:relative;min-height:126px;border:2px solid var(--ink);border-radius:15px;background:var(--paper);padding:40px 14px 16px;display:flex;align-items:end;font-weight:800;line-height:1.35}.founder::before{content:"";position:absolute;left:14px;top:15px;width:14px;height:14px;border:2px solid var(--ink);border-radius:50%;background:var(--card)}.founder::after{content:"";position:absolute;left:33px;top:21px;width:calc(100% - 39px);height:2px;background:var(--ink);opacity:.25}.founder.primary{background:var(--green)}.founder small{display:block;font-size:11px;font-weight:650;color:var(--muted);margin-top:6px}.policy{margin:0 26px 24px;padding:13px 16px;border-radius:10px;background:#102a220a;color:var(--muted);font-size:13px;line-height:1.65}.brand-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.brand-grid .visual{height:220px;background:#f8f5ed}.brand-grid .visual img{padding:34px}.brand-grid .symbol img{padding:44px}.brand-grid .outline{background:var(--paper)}.brand-grid .outline img{padding:40px}.abstract{padding:24px 26px 28px;line-height:1.8;color:var(--muted)}.abstract b{color:var(--ink)}footer{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;padding:18px clamp(20px,5vw,70px);background:#fffdf7f2;border-top:2px solid var(--ink);backdrop-filter:blur(14px)}button{appearance:none;border:2px solid var(--ink);border-radius:12px;background:var(--green);color:var(--ink);box-shadow:4px 4px 0 var(--ink);padding:14px 20px;font-size:15px;font-weight:850;cursor:pointer;white-space:nowrap}button:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}#reply{font-size:14px;line-height:1.6;color:var(--muted);overflow-wrap:anywhere}.audit{padding:0 clamp(20px,5vw,70px) 20px;color:var(--muted);font-size:12px;text-align:right}@media(max-width:1100px){.founders{grid-template-columns:repeat(4,minmax(120px,1fr))}}@media(max-width:760px){header{align-items:start;flex-direction:column}.compare,.brand-grid{grid-template-columns:1fr}.panel{border-right:0;border-bottom:1px solid var(--line)}.panel:last-child{border-bottom:0}.founders{grid-template-columns:repeat(2,minmax(120px,1fr))}footer{grid-template-columns:1fr}.visual{height:300px}.brand-grid .visual{height:190px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+<style>
+.founder{background-color:var(--paper);background-image:radial-gradient(circle at center,var(--ink) 1.25px,transparent 1.6px);background-size:12px 12px}.founder>div{background:#f4f0e6e8;border-radius:7px;padding:9px 8px;box-shadow:0 0 0 1px #102a2214}.founder.primary{background-color:var(--green)}.founder.primary>div{background:#c6ff3de8}.founder::before{background-image:radial-gradient(circle at center,var(--ink) 1px,transparent 1.4px);background-size:4px 4px}
+</style>
+</head>
+<body>
+<header><div><h1>风格化母版确认板</h1><p>《A社的F股》 · 第二轮：确认可复用资产，不进入分镜制作</p></div><span class="stage">MASTER PENDING</span></header>
+<div class="notice"><b>请检查统一后的点阵母版。</b>重要名词先展示可复用母版和实际变体；人物只保留外轮廓，内部点阵不读取照片亮度，绝不呈现五官；品牌只在已确认的真实路径内做点阵填充，原始几何路径不变。点击底部按钮生成文字后，仍需回到对话明确回复确认，才会锁定资产并进入两段代表样片。</div>
+<main>
+<section class="asset"><div class="asset-head"><span class="id">N0</span><div><h2>重要名词 · 母版与变体总览</h2><p>参考方向已确认；本轮检查轮廓、比例、动作与复用边界，尚未锁定资产。</p></div></div><div class="abstract"><b>统一复用：</b>公司／创始人公司 → N1 公司楼宇；公益基金／长期利益信托 → N2 机构建筑变体；股东／投票者 → G0 通用无脸人物；投票／表决 → N3 人物、选票与票箱；董事／特别董事 → N4 董事座椅。股票、合同与权利凭证继续保留凭证形态。</div></section>
+<section class="asset"><div class="asset-head"><span class="id">G0-A</span><div><h2>通用人物 · 中立母版与角色、动作变体</h2><p>同一头身比例、点距和线宽；无外部肖像参考、不代表特定真人，内部永不生成五官。</p></div></div><div class="brand-grid">
+<div class="panel"><div class="panel-label"><span>中立站立</span><span class="tag">MASTER V1</span></div><div class="visual"><svg data-semantic="generic" viewBox="0 0 360 360" role="img" aria-label="通用无脸点阵人物中立母版" style="display:block;width:100%;height:100%"></svg></div><h3>通用人物母版</h3><p>只保留头肩、躯干和四肢外轮廓，点阵由固定坐标生成。</p></div>
+<div class="panel"><div class="panel-label"><span>股东角色</span><span class="tag">VARIANT</span></div><div class="visual"><svg data-semantic="shareholder" viewBox="0 0 360 360" role="img" aria-label="通用人物股东编号变体" style="display:block;width:100%;height:100%"></svg></div><h3>编号与色彩派生</h3><p>只增加胸前编号和角色标签，不改成圆圈首字母。</p></div>
+<div class="panel"><div class="panel-label"><span>举手动作</span><span class="tag">ACTION</span></div><div class="visual"><svg data-semantic="voting" viewBox="0 0 360 360" role="img" aria-label="通用人物举手投票组合变体" style="display:block;width:100%;height:100%"></svg></div><h3>动作与组合派生</h3><p>举手人物与选票、票箱组合，后续可拆分、排队和聚合。</p></div>
+</div><p class="policy">复用边界：保持人物轮廓、头身比例和点阵密度；只允许改变已声明的姿态、编号、颜色与组合关系。</p></section>
+<section class="asset"><div class="asset-head"><span class="id">N1-A</span><div><h2>公司楼宇 · 主母版与状态接口</h2><p>固定楼体轮廓、对称配楼、中心入口与旗帜，不再用公司文字卡代替。</p></div></div><div class="compare">
+<div class="panel"><div class="panel-label"><span>公司楼宇母版</span><span class="tag">MASTER V1</span></div><div class="visual"><svg data-semantic="company" viewBox="0 0 360 360" role="img" aria-label="点阵公司楼宇母版" style="display:block;width:100%;height:100%"></svg></div><h3>同一公司，跨镜头复用</h3><p>门窗、旗帜和灯窗保留为独立状态节点。</p></div>
+<div class="panel"><div class="panel-label"><span>允许的资产变体</span><span class="tag">REUSE RULES</span></div><div class="abstract"><b>结构不变：</b>主楼、配楼与基座的比例固定。<br><b>状态可变：</b>入口开合、灯窗点亮、旗帜运动、人物进出与凭证分发。<br><b>组合可扩：</b>创始团队在公司前聚合，股权凭证从公司发出；不得在单个镜头里重新发明另一套楼体。</div></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">N2-A</span><div><h2>机构建筑 · 同一母版的基金与信托变体</h2><p>柱式结构、屋顶和门廊保持一致，只改变标识、名称与点缀色；不指向真实机构地点。</p></div></div><div class="brand-grid">
+<div class="panel"><div class="panel-label"><span>机构主母版</span><span class="tag">MASTER V1</span></div><div class="visual"><svg data-semantic="institution" viewBox="0 0 360 360" role="img" aria-label="点阵柱式机构建筑母版" style="display:block;width:100%;height:100%"></svg></div><h3>柱式机构</h3><p>作为同类机构的共同结构母版。</p></div>
+<div class="panel"><div class="panel-label"><span>公益基金</span><span class="tag">FUND</span></div><div class="visual"><svg data-semantic="fund" viewBox="0 0 360 360" role="img" aria-label="公益基金机构建筑变体" style="display:block;width:100%;height:100%"></svg></div><h3>基金变体</h3><p>紫色状态标识，不改变建筑几何。</p></div>
+<div class="panel"><div class="panel-label"><span>长期利益信托</span><span class="tag">LTBT</span></div><div class="visual"><svg data-semantic="trust" viewBox="0 0 360 360" role="img" aria-label="长期利益信托机构建筑变体" style="display:block;width:100%;height:100%"></svg></div><h3>信托变体</h3><p>黄色状态标识，沿用同一柱式母版。</p></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">N3-A</span><div><h2>投票表决 · 完整组合与紧凑变体</h2><p>用真实动作关系表现投票权：人物举手、选票进入票箱，而不是只显示数字模块。</p></div></div><div class="compare">
+<div class="panel"><div class="panel-label"><span>多人表决组合</span><span class="tag">ASSEMBLY</span></div><div class="visual"><svg data-semantic="voting" viewBox="0 0 360 360" role="img" aria-label="多人举手投票完整组合母版" style="display:block;width:100%;height:100%"></svg></div><h3>完整动作场景</h3><p>适用于表决、投票权集结和更换董事。</p></div>
+<div class="panel"><div class="panel-label"><span>紧凑投票权</span><span class="tag">COMPACT</span></div><div class="visual"><svg data-semantic="vote" viewBox="0 0 360 360" role="img" aria-label="紧凑投票权人物票箱变体" style="display:block;width:100%;height:100%"></svg></div><h3>紧凑动作变体</h3><p>适用于画面边角和与股权凭证并置。</p></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">N4-A</span><div><h2>董事座椅 · 席位母版与控制状态</h2><p>固定椅背、扶手和底座比例；通过 T／E 标识色、席位连线和增减动作表达治理关系。</p></div></div><div class="compare">
+<div class="panel"><div class="panel-label"><span>特别董事座椅</span><span class="tag">MASTER V1</span></div><div class="visual"><svg data-semantic="chair" viewBox="0 0 360 360" role="img" aria-label="点阵特别董事座椅母版" style="display:block;width:100%;height:100%"></svg></div><h3>席位而非姓名卡</h3><p>母版保留 T 席标识，E 席只派生颜色和状态。</p></div>
+<div class="panel"><div class="panel-label"><span>允许的资产变体</span><span class="tag">REUSE RULES</span></div><div class="abstract"><b>席位可复用：</b>单席、并排、增减与空缺。<br><b>关系可动画：</b>控制线连接、断开和重新归位。<br><b>结构不重画：</b>椅背、扶手、底座与点阵密度保持固定，不把董事退化为姓名卡片。</div></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">P1-A</span><div><h2>达里奥 · 无五官轮廓点阵母版</h2><p>只保留头肩、抬手与肩线；不保留照片明暗、面部纹理或可辨认五官。</p></div></div><div class="compare">
+<div class="panel"><div class="panel-label"><span>已确认官方参考</span><span class="tag">REFERENCE</span></div><div class="visual portrait"><img src="assets/library/person-dario-amodei/reference.webp" alt="达里奥官方肖像参考"></div><h3>原始照片</h3><p>只用于提取外轮廓，不向母版传递内部五官信息。</p></div>
+<div class="panel"><div class="panel-label"><span>轮廓点阵母版</span><span class="tag">MASTER V2</span></div><div class="visual portrait"><img src="assets/library/person-dario-amodei/variants/master-preview.jpg" alt="达里奥无五官轮廓点阵母版"></div><h3>人物资产母版</h3><p>坐标生成的规则点阵与少量粒子；后续仅做裁切、遮罩和动画派生。</p></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">P2-A</span><div><h2>七位创始人 · 点阵实名节点</h2><p>只有达里奥使用无五官轮廓点阵母版，其余六人保持点阵实名节点，不生成虚构头像或群像。</p></div></div><div class="founders">
+<div class="founder primary"><div>Dario Amodei<small>使用 P1-A 轮廓点阵</small></div></div>
+<div class="founder"><div>Daniela Amodei<small>点阵实名节点</small></div></div>
+<div class="founder"><div>Tom Brown<small>点阵实名节点</small></div></div>
+<div class="founder"><div>Jack Clark<small>点阵实名节点</small></div></div>
+<div class="founder"><div>Jared Kaplan<small>点阵实名节点</small></div></div>
+<div class="founder"><div>Sam McCandlish<small>点阵实名节点</small></div></div>
+<div class="founder"><div>Chris Olah<small>点阵实名节点</small></div></div>
+</div><p class="policy">锁定规则：点阵只由坐标生成；节点可拆分、连线、聚合与复用，不得擅自补画头像或五官。</p></section>
+<section class="asset"><div class="asset-head"><span class="id">B1-A</span><div><h2>Claude · 真实图形标识点阵派生</h2><p>原始图形路径完全不变，点阵只作为路径内部填充，不用基础几何重新猜画。</p></div></div><div class="brand-grid">
+<div class="panel"><div class="panel-label"><span>原色参考</span><span class="tag">REFERENCE</span></div><div class="visual symbol"><img src="assets/library/brand-claude/variants/original.svg" alt="Claude 原色图形参考"></div></div>
+<div class="panel"><div class="panel-label"><span>点阵母版</span><span class="tag">MASTER V2</span></div><div class="visual symbol"><img src="assets/library/brand-claude/master.svg" alt="Claude 点阵图形母版"></div></div>
+<div class="panel"><div class="panel-label"><span>描边变体</span><span class="tag">OUTLINE</span></div><div class="visual symbol outline"><img src="assets/library/brand-claude/variants/outline.svg" alt="Claude 描边图形变体"></div></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">B2-A</span><div><h2>Anthropic · 真实字标点阵派生</h2><p>保留字形路径和比例，点阵填充不重排文字、不改变任何字标轮廓。</p></div></div><div class="brand-grid">
+<div class="panel"><div class="panel-label"><span>原色参考</span><span class="tag">REFERENCE</span></div><div class="visual"><img src="assets/library/brand-anthropic/variants/original.svg" alt="Anthropic 原色字标参考"></div></div>
+<div class="panel"><div class="panel-label"><span>点阵母版</span><span class="tag">MASTER V2</span></div><div class="visual"><img src="assets/library/brand-anthropic/master.svg" alt="Anthropic 点阵字标母版"></div></div>
+<div class="panel"><div class="panel-label"><span>描边变体</span><span class="tag">OUTLINE</span></div><div class="visual outline"><img src="assets/library/brand-anthropic/variants/outline.svg" alt="Anthropic 描边变体"></div></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">B3-A</span><div><h2>Amazon · 2024 当前版点阵派生</h2><p>保留当前品牌字形与 smile 路径，原色、点阵和描边版本共用同一组真实路径。</p></div></div><div class="brand-grid">
+<div class="panel"><div class="panel-label"><span>原色参考</span><span class="tag">REFERENCE</span></div><div class="visual"><img src="assets/library/brand-amazon/variants/original.svg" alt="Amazon 原色参考"></div></div>
+<div class="panel"><div class="panel-label"><span>点阵母版</span><span class="tag">MASTER V2</span></div><div class="visual"><img src="assets/library/brand-amazon/master.svg" alt="Amazon 点阵母版"></div></div>
+<div class="panel"><div class="panel-label"><span>描边变体</span><span class="tag">OUTLINE</span></div><div class="visual outline"><img src="assets/library/brand-amazon/variants/outline.svg" alt="Amazon 描边变体"></div></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">B4-A</span><div><h2>Google · 2026 当前版点阵派生</h2><p>保留当前字标的多路径结构，点阵版不重绘、不合并字形、不改变路径。</p></div></div><div class="brand-grid">
+<div class="panel"><div class="panel-label"><span>原色参考</span><span class="tag">REFERENCE</span></div><div class="visual"><img src="assets/library/brand-google/variants/original.svg" alt="Google 原色参考"></div></div>
+<div class="panel"><div class="panel-label"><span>点阵母版</span><span class="tag">MASTER V2</span></div><div class="visual"><img src="assets/library/brand-google/master.svg" alt="Google 点阵母版"></div></div>
+<div class="panel"><div class="panel-label"><span>描边变体</span><span class="tag">OUTLINE</span></div><div class="visual outline"><img src="assets/library/brand-google/variants/outline.svg" alt="Google 描边变体"></div></div>
+</div></section>
+<section class="asset"><div class="asset-head"><span class="id">O1</span><div><h2>抽象机制 · 统一点阵语言，不新增实物</h2><p>钱包、星期四日历、股票及权利结构只用文字、数字、点阵和抽象关系表达。</p></div></div><div class="abstract"><b>本轮无新增实物母版。</b>点阵只承担统一纹理与机制表达。若后续需要具象物品，必须重新联网找参考并再次经过“参考确认 → 母版确认”，不得在分镜阶段临时凭空绘制。</div></section>
+</main>
+<div class="audit" id="audit">正在检查本页资产是否完整加载…</div>
+<footer><button id="build" type="button">生成母版确认回复</button><div id="reply">确认所有母版后，生成可发回对话的确认文字。</div></footer>
+<script src="asset-board.js"></script>
+<script src="两段预览/semantic-assets.js"></script>
+<script>
+const replyText='风格化母版确认：重要名词、通用人物及原有人物与品牌母版全部通过，同意锁定资产并进入两段代表样片。';
+document.getElementById('build').addEventListener('click',async()=>{document.getElementById('reply').textContent=replyText;try{await navigator.clipboard.writeText(replyText);document.getElementById('build').textContent='已复制确认回复';}catch(e){document.getElementById('build').textContent='已生成，请复制右侧文字';}});
+window.addEventListener('load',()=>{const images=[...document.images];const broken=images.filter(img=>!img.complete||img.naturalWidth===0);const semantic=document.querySelectorAll('svg[data-semantic]');const ready=document.querySelectorAll('svg[data-semantic][data-semantic-ready="true"]');const failed=broken.length+semantic.length-ready.length;document.getElementById('audit').textContent=failed?`资产检查：${broken.length} 项图片、${semantic.length-ready.length} 项语义资产未成功加载，请勿确认。`:`资产检查：${images.length} 项图像、${ready.length} 项语义资产均已成功加载。`;document.getElementById('audit').style.color=failed?'#b3261e':'#617068';});
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "title": "Motion Layer · 组件级动效样片",
+  "width": 1080,
+  "height": 1920,
+  "audio": "",
+  "scenes": [
+    {
+      "id": "motion-study",
+      "type": "motionSequence",
+      "start": 0,
+      "duration": 20,
+      "props": {
+        "productName": "PRODUCT",
+        "profile": {
+          "source": "generic",
+          "name": "PRODUCT",
+          "tokens": {
+            "accent": "#c6ff3d",
+            "background": "#f4f0e6",
+            "ink": "#102a22"
+          }
+        }
+      },
+      "timing": {}
+    }
+  ]
+}
