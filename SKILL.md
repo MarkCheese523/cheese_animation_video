@@ -247,5 +247,6 @@ flowchart TD
 - `references/design-aesthetic.md` —— 设计审美层：70 分差距诊断 + 四步建设路线 + 采购清单 + 复盘记录
 - `references/cheeseheart-style/README.md` —— **芝士心 · 荧光绿科技**（`cheeseheart-tech`）完整皮肤：近黑底、荧光绿、品红/紫点缀、等宽数据、HUD、构件、动效与样张；选择该风格时必须通读并遵循，仍复用主引擎与全部叙事/确认/导出闸门
 - `references/asset-pipeline.md` —— **素材资产定稿与复用流程**（素材清单、候选参考、两道主动确认闸门、风格化母版、变体、授权记录与资产 QA）
+- `references/execution-contract.md` —— **执行契约（弱模型版）**：表A–F 固定流程、布局模板与视觉动词查表（映射到引擎真实 helper）、承接决策树、硬数字与 `?lint` 零报错门槛；执行模型先填表、人审通过后才写代码
 - 独立开发工程：`~/dev/html-animation-video/`（唯一引擎与资产流程母本，跨项目复用；可用 `HTML_ANIMATION_VIDEO_ROOT` 覆盖）
 - 通用参考实现：`assets/template/`（只含模板与演示数据；具体视频案例、配音、素材和确认产物不进入通用仓库）
