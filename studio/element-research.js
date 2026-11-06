@@ -73,7 +73,7 @@ async function searchIconCandidates(query, limit = 5) {
 function researchRoute(slot) {
   if (slot.researchRoute && slot.researchRoute !== 'auto') return slot.researchRoute;
   if (slot.brandOnly) return 'web';
-  if (slot.id === 'G0' || slot.abstractOnly) return 'semantic';
+  if (slot.semanticOnly || slot.id === 'G0' || slot.abstractOnly) return 'semantic';
   return 'icon';
 }
 
