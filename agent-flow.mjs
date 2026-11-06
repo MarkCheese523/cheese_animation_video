@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
-import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -144,12 +144,40 @@ export async function saveAgentAnalysis(jobId, input) {
   return analysis;
 }
 
+export async function saveAgentDraft(jobId, input = {}) {
+  const directory = jobDirectory(jobId);
+  await readFile(path.join(directory, 'job.json'), 'utf8');
+  if (input.jobId !== jobId || input.analysis?.jobId !== jobId || !Array.isArray(input.slots) || !Array.isArray(input.beats)) {
+    throw new Error('草稿的任务 ID、分镜或素材数据不匹配');
+  }
+  const draft = { ...input, version: 2, savedAt: new Date().toISOString() };
+  await writeFile(path.join(directory, 'draft.json'), `${JSON.stringify(draft, null, 2)}\n`, 'utf8');
+  return { jobId, savedAt: draft.savedAt };
+}
+
 export async function readAgentJob(jobId) {
   const directory = jobDirectory(jobId);
   const job = JSON.parse(await readFile(path.join(directory, 'job.json'), 'utf8'));
   let analysis = null;
+  let draft = null;
   try { analysis = JSON.parse(await readFile(path.join(directory, 'analysis.json'), 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  return { job, analysis, status: analysis ? 'analysis_ready' : 'awaiting_agent', prompt: handoffPrompt(jobId) };
+  try { draft = JSON.parse(await readFile(path.join(directory, 'draft.json'), 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  return { job, analysis, draft, status: analysis ? 'analysis_ready' : 'awaiting_agent', prompt: handoffPrompt(jobId) };
+}
+
+export async function readLatestAgentJob() {
+  const entries = await readdir(ROOT, { withFileTypes: true }).catch(error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  const jobs = await Promise.all(entries
+    .filter(entry => entry.isDirectory() && safeId(entry.name))
+    .map(async entry => {
+      try { return await readAgentJob(entry.name); } catch { return null; }
+    }));
+  return jobs
+    .filter(value => value?.analysis)
+    .sort((a, b) => Date.parse(b.draft?.savedAt || b.job.createdAt) - Date.parse(a.draft?.savedAt || a.job.createdAt))[0] || null;
 }
 
 export async function uploadAgentAsset(req, filename) {

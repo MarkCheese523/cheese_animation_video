@@ -78,8 +78,10 @@ function researchRoute(slot) {
 }
 
 async function searchWebCandidates(slot) {
+  const localName = (slot.semanticName || slot.concept || '')
+    .replace(/(?:品牌|产品)?标识.*$/, '').replace(/(?:与|和).*$/, '').trim();
   const query = (slot.brandOnly
-    ? (slot.semanticName || slot.query || slot.concept)
+    ? [slot.query, localName].filter(Boolean).join(' ')
     : (slot.query || slot.semanticName || slot.concept)).trim();
   const params = new URLSearchParams({ query, brand: slot.brandOnly ? '1' : '0', limit: '4' });
   const response = await fetch(`/api/asset-research?${params}`, { signal: AbortSignal.timeout(35000) });

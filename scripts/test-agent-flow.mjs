@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
 import { readFile, rm, unlink } from 'node:fs/promises';
 import path from 'node:path';
-import { createAgentJob, readAgentJob, saveAgentAnalysis, uploadAgentAsset, validateAgentAnalysis } from '../agent-flow.mjs';
+import { createAgentJob, readAgentJob, readLatestAgentJob, saveAgentAnalysis, saveAgentDraft, uploadAgentAsset, validateAgentAnalysis } from '../agent-flow.mjs';
 import { makeAgentAnalysis } from './fixtures/agent-analysis.mjs';
 
 const job = await createAgentJob({ script: 'AsterQuark 将凭证拆分并同步。', mode: 'generic', style: 'cream-neon', aspect: '9:16' });
@@ -26,6 +26,21 @@ try {
   const invalid = structuredClone(analysis);
   invalid.beats[0].assetIds = ['MISSING'];
   assert.throws(() => validateAgentAnalysis(invalid, job.jobId), /不存在的素材/);
+
+  const draft = {
+    jobId: job.jobId, analysis: ready.analysis, slots: ready.analysis.assets, beats: ready.analysis.beats,
+    script: ready.job.script, confirmations: { storyboard: true, references: false, masters: false, samples: false },
+    selections: { B1: { id: 'selected-reference' } }, currentStep: 'elements'
+  };
+  await saveAgentDraft(job.jobId, draft);
+  const restored = await readAgentJob(job.jobId);
+  assert.equal(restored.draft.confirmations.storyboard, true);
+  assert.equal(restored.draft.selections.B1.id, 'selected-reference');
+  assert.equal(restored.draft.currentStep, 'elements');
+  const latest = await readLatestAgentJob();
+  assert.equal(latest.job.id, job.jobId);
+  assert.equal(latest.draft.jobId, job.jobId);
+  await assert.rejects(() => saveAgentDraft(job.jobId, { ...draft, jobId: 'motion-00000000-0000-0000-0000-000000000000' }), /不匹配/);
 
   const upload = await uploadAgentAsset(Readable.from(['1\n00:00:00,000 --> 00:00:01,000\n测试\n']), 'voice.srt');
   try {

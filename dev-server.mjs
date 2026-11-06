@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { researchProduct } from './product-profile.mjs';
 import { writeStoryboard } from './storyboard.mjs';
-import { createAgentJob, readAgentJob, saveAgentAnalysis, uploadAgentAsset } from './agent-flow.mjs';
+import { createAgentJob, readAgentJob, readLatestAgentJob, saveAgentAnalysis, saveAgentDraft, uploadAgentAsset } from './agent-flow.mjs';
 import { researchWebAssets } from './asset-research.mjs';
 import { createProductionJob, readProductionJob, saveProductionResult } from './production-flow.mjs';
 
@@ -49,8 +49,13 @@ const server = http.createServer(async (req, res) => {
       try {
         const params = new URL(req.url, 'http://localhost').searchParams;
         const candidates = await researchWebAssets({ query: params.get('query') || '', brand: params.get('brand') === '1', limit: params.get('limit') });
-        sendJson(res, 200, { candidates, source: 'Wikimedia Commons' });
+        sendJson(res, 200, { candidates, source: 'Bing 国内图片 + Wikimedia Commons' });
       } catch (error) { sendJson(res, 502, { error: error.message || '互联网图片检索失败', candidates: [] }); }
+      return;
+    }
+    if (pathname === '/api/agent-jobs/latest' && req.method === 'GET') {
+      try { sendJson(res, 200, { result: await readLatestAgentJob() }); }
+      catch (error) { sendJson(res, 500, { error: error.message || '最近任务读取失败' }); }
       return;
     }
     if (pathname === '/api/agent-jobs' && req.method === 'POST') {
@@ -58,10 +63,11 @@ const server = http.createServer(async (req, res) => {
       catch (error) { sendJson(res, 400, { error: error.message || 'Agent 任务创建失败' }); }
       return;
     }
-    const agentMatch = pathname.match(/^\/api\/agent-jobs\/(motion-[a-f0-9-]{36})(\/analysis)?$/);
+    const agentMatch = pathname.match(/^\/api\/agent-jobs\/(motion-[a-f0-9-]{36})(?:\/(analysis|draft))?$/);
     if (agentMatch) {
       try {
-        if (agentMatch[2] && req.method === 'POST') sendJson(res, 200, await saveAgentAnalysis(agentMatch[1], await readJson(req, 524_288)));
+        if (agentMatch[2] === 'analysis' && req.method === 'POST') sendJson(res, 200, await saveAgentAnalysis(agentMatch[1], await readJson(req, 524_288)));
+        else if (agentMatch[2] === 'draft' && req.method === 'POST') sendJson(res, 200, await saveAgentDraft(agentMatch[1], await readJson(req, 1_048_576)));
         else if (!agentMatch[2] && req.method === 'GET') sendJson(res, 200, await readAgentJob(agentMatch[1]));
         else sendJson(res, 405, { error: '不支持的 Agent 任务操作' });
       } catch (error) { sendJson(res, error.code === 'ENOENT' ? 404 : 400, { error: error.message || 'Agent 任务读取失败' }); }
