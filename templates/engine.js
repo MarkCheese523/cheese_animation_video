@@ -1,14 +1,19 @@
 /* =====================================================================
- * Cheese Motion continuous-stage engine v2.0
+ * Cheese Motion continuous-stage engine v2.1
  * One SVG stage, deterministic Sprite windows, Carry helpers and 2.5D.
  * Classic browser script: initStage() -> build sprites -> boot({...}).
  * Node tests may evaluate this file in a VM and use global MotionEngine.
+ *
+ * v2.1 加固:参数校验抛错(setBox/kf/S/TX 对象形态)、Sprite 默认隐藏、
+ * SHAKE 震屏、data-free 豁免、?lint 自动检查(静态+动态采样)、错误面板。
  * ===================================================================== */
 (function attachMotionEngine(root) {
   'use strict';
 
   const W = 1080, H = 1920, D = Math.PI / 180;
   const NS = 'http://www.w3.org/2000/svg';
+  /** 安全区:与 references/stage-layout.md 一致。左右边距 60,字幕区 1360 以下禁止元素进入。 */
+  const SAFE = Object.freeze({ x0: 60, x1: 1020, y0: 0, y1: 1360 });
   const DEFAULT_THEME = Object.freeze({
     background: '#f4f0e6', surface: '#fffdf7', surfaceRaised: '#ffffff',
     ink: '#102a22', text: '#102a22', muted: '#65736b', accent: '#c6ff3d',
@@ -67,10 +72,12 @@
 
   /** K = [[time, number|array, easing?], ...]; easing belongs to the incoming segment. */
   function kf(t, K) {
-    if (!K || !K.length) throw new Error('kf requires at least one keyframe');
+    if (!Array.isArray(K) || !K.length || !Array.isArray(K[0]))
+      throw new Error('kf: 关键帧必须是 [[t, 值, 缓动?], ...]，收到 ' + JSON.stringify(K));
     if (t <= K[0][0]) return K[0][1];
     for (let i = 0; i < K.length - 1; i += 1) {
       const [t0, v0] = K[i], [t1, v1, easing] = K[i + 1];
+      if (!(t1 > t0)) throw new Error(`kf: 关键帧时间必须递增(${t0} → ${t1})`);
       if (t <= t1) {
         const u = (easing || eio)(p(t, t0, t1));
         return Array.isArray(v0) ? lerpA(v0, v1, u) : v0 + (v1 - v0) * u;
@@ -101,7 +108,12 @@
     layers.forEach(key => { L[key] = mk('g', { 'data-layer': key }, cam); });
     return L;
   }
-  const S = (el, t0, t1, fn) => {
+  const S = (el, t0, t1, fn, name) => {
+    if (el != null && typeof el.setAttribute !== 'function') throw new Error('S: 第一个参数必须是 SVG 元素' + (name ? `(${name})` : ''));
+    if (!(t1 > t0)) throw new Error(`S: 时间窗无效 ${t0}–${t1}` + (name ? `(${name})` : ''));
+    if (fn != null && typeof fn !== 'function') throw new Error('S: 每帧更新必须是函数' + (name ? `(${name})` : ''));
+    if (el && el.style) el.style.visibility = 'hidden';
+    if (el && name) el.setAttribute('data-name', name);
     const sprite = { el, t0, t1, fn };
     SPR.push(sprite);
     return sprite;
@@ -164,6 +176,16 @@
     return g;
   }
   function TX(value, x, y, fs, t0, t1, o = {}) {
+    if (value && typeof value === 'object') {
+      const spec = value, bt0 = x, bt1 = y;
+      if (typeof spec.text !== 'string') throw new Error('TX: text 必须是字符串，收到 ' + JSON.stringify(spec));
+      if (typeof spec.size !== 'number' || Number.isNaN(spec.size)) throw new Error('TX: size 必须是数字，收到 ' + JSON.stringify(spec));
+      const g = G(spec.par || L.labels);
+      T(g, spec.text, 0, 0, spec.size, spec.color || THEME.text, spec);
+      const px = spec.x ?? 0, py = spec.y ?? 0;
+      act(g, bt0, bt1, { x: px, y: [[bt0, py + 18], [bt0 + .35, py, eo]], o: io(bt0, bt1, .25), s: spec.scale ?? 1, r: spec.r ?? 0 });
+      return g;
+    }
     const g = G(o.par || L.labels);
     T(g, value, 0, 0, fs, o.color || THEME.text, o);
     act(g, t0, t1, { x, y: [[t0, y + 18], [t0 + .35, y, eo]], o: io(t0, t1, .25) });
@@ -235,7 +257,7 @@
   }
 
   function mkFig(parent, color = THEME.actor, width = 5, dash) {
-    const g = G(parent, { fill: 'none', stroke: color, 'stroke-width': width, 'stroke-linecap': 'round' });
+    const g = G(parent, { fill: 'none', stroke: color, 'stroke-width': width, 'stroke-linecap': 'round', 'data-free': '' });
     if (dash) g.setAttribute('stroke-dasharray', dash);
     const F = { g };
     ['legL', 'legR', 'torso', 'armL', 'armR'].forEach(key => { F[key] = mk('line', {}, g); });
@@ -293,10 +315,20 @@
   }
 
   /* ------------------------- Carry helpers ------------------------- */
+  /** 世界坐标盒子写入:[cx,cy,w,h,rx] 五个数字,rx 自动夹紧。会变形的元素配合 kf 使用。 */
+  function setBox(el, box) {
+    if (!Array.isArray(box) || box.length !== 5 || box.some(value => typeof value !== 'number' || Number.isNaN(value)))
+      throw new Error('setBox: 盒子必须是 [cx,cy,w,h,rx] 五个数字，收到 ' + JSON.stringify(box));
+    const [cx, cy, bw, bh, rx] = box;
+    at(el, { x: cx - bw / 2, y: cy - bh / 2, width: Math.max(0, bw), height: Math.max(0, bh), rx: clamp(rx, 0, Math.max(0, Math.min(bw, bh) / 2)) });
+    return el;
+  }
   /** K = [[t,[x,y,w,h,rx,opacity?]], ...], all values in the rect's parent coordinates. */
   function morphRect(el, t0, t1, K, fn) {
     S(el, t0, t1, t => {
-      const state = kf(t, K), [x, y, w, h, rx, opacity = 1] = state;
+      const state = kf(t, K);
+      if (!Array.isArray(state) || state.length < 5) throw new Error('morphRect: 形态必须是 [x,y,w,h,rx,opacity?]，收到 ' + JSON.stringify(state));
+      const [x, y, w, h, rx, opacity = 1] = state;
       at(el, { x: x - w / 2, y: y - h / 2, width: w, height: h, rx: Math.max(0, Math.min(rx, w / 2, h / 2)) });
       op(el, opacity);
       if (fn) fn(t, state);
@@ -401,7 +433,100 @@
     }
   }
 
-  function boot({ T0, END, TOTAL = END, SUBS = [], CAM = [[0, [820, 1]]], theme, audio, audioOffset = T0 }) {
+  /* ------------------------- Lint 自动检查 ------------------------- */
+  const vlen = value => [...String(value).replace(/<[^>]+>/g, '')].reduce((sum, ch) => sum + (/[\x00-\xff]/.test(ch) ? .5 : 1), 0);
+  function effOp(el) {
+    let value = 1;
+    for (let node = el; node && node.id !== 'cam'; node = node.parentNode) {
+      const attr = node.getAttribute && node.getAttribute('opacity');
+      if (attr != null) value *= +attr;
+    }
+    return value;
+  }
+  function lintDesc(el) {
+    if (!el || !el.tagName) return '逻辑精灵';
+    if (el.tagName === 'text') return `文字「${String(el.textContent).slice(0, 14)}」`;
+    const owner = typeof el.closest === 'function' ? el.closest('[data-name]') : null;
+    return `${el.tagName}${owner ? `(${owner.getAttribute('data-name')})` : ''}`;
+  }
+  /** 静态检查:不依赖 DOM 测量,可在 Node VM 中运行。返回按时间排序的 [[时间, 问题], ...]。 */
+  function lintStatic({ T0 = 0, END = 0, SUBS = [], sprites = SPR } = {}) {
+    const issues = [];
+    const seen = new Set();
+    const add = (t, key, msg) => { if (!seen.has(key)) { seen.add(key); issues.push([t, msg]); } };
+    SUBS.forEach((item, index) => {
+      const lines = String(item[2]).split('<br>');
+      if (lines.length > 2) add(item[0], `sub-lines-${index}`, `字幕超过 2 行:${lines.join('')}`);
+      lines.forEach((line, lineIndex) => { if (vlen(line) > 14.5) add(item[0], `sub-len-${index}-${lineIndex}`, `字幕单行超过 14 字:${line}`); });
+      if (!(item[1] > item[0])) add(item[0], `sub-time-${index}`, '字幕结束时间必须大于开始时间');
+      if (index && item[0] < SUBS[index - 1][1] - 1e-3) add(item[0], `sub-overlap-${index}`, '字幕时间与上一条重叠');
+    });
+    sprites.forEach((sprite, index) => {
+      if (sprite.t1 < T0 || sprite.t0 > END) add(sprite.t0, `win-${index}`, `精灵时间窗不在本段范围内:${lintDesc(sprite.el)}`);
+    });
+    return issues.sort((a, b) => a[0] - b[0]);
+  }
+  /** 结果面板:列出问题,点击某一条跳转到对应时间。 */
+  function showPanel(items, title) {
+    if (typeof document === 'undefined' || !document.createElement) return;
+    let panel = document.getElementById('lintPanel');
+    if (!panel) {
+      panel = document.createElement('div'); panel.id = 'lintPanel';
+      panel.style.cssText = 'position:fixed;right:10px;top:10px;width:440px;max-height:75vh;overflow:auto;background:rgba(12,12,12,.94);color:#fff;font:13px/1.5 Consolas,monospace;padding:10px 12px;border:1px solid #ed6a5a;z-index:99';
+      document.body.appendChild(panel);
+    }
+    const esc = text => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    panel.innerHTML = `<b>${esc(title)}</b>` + (items.length
+      ? items.map(([t, msg]) => `<div data-t="${t}" style="cursor:pointer;border-top:1px solid #333;padding:3px 0">${(+t).toFixed(2)}s · ${esc(msg)}</div>`).join('')
+      : '<div style="color:#8f8">✓ 没有发现问题</div>');
+    panel.onclick = event => {
+      const t = event.target && event.target.dataset && event.target.dataset.t;
+      if (t == null || !root.renderAt) return;
+      root.renderAt(+t);
+      const scrub = document.getElementById('scrub');
+      if (scrub) scrub.value = t;
+    };
+  }
+  /** 动态采样检查:每 0.25s 渲染一帧做几何测量,仅浏览器 ?lint 模式运行。 */
+  function runLint(render, T0, END, SUBS, back0) {
+    const issues = lintStatic({ T0, END, SUBS });
+    const seen = new Set(issues.map(([, msg]) => msg));
+    const add = (t, key, msg) => { if (!seen.has(key)) { seen.add(key); issues.push([t, msg]); } };
+    const stage = document.getElementById('stage');
+    const selector = '#cam text,#cam rect,#cam circle,#cam ellipse,#cam path,#cam polyline,#cam line,#cam image';
+    for (let t = T0; t <= END + 1e-6; t += .25) {
+      render(t);
+      const sb = stage.getBoundingClientRect(), scale = sb.width / W;
+      const box = el => { const r = el.getBoundingClientRect(); return { x: (r.left - sb.left) / scale, y: (r.top - sb.top) / scale, w: r.width / scale, h: r.height / scale }; };
+      const shown = [...document.querySelectorAll(selector)].filter(el => getComputedStyle(el).visibility === 'visible' && effOp(el) > .3);
+      const texts = [];
+      shown.forEach(el => {
+        if (typeof el.closest === 'function' && el.closest('[data-free]')) return;
+        const b = box(el); if (b.w < 1 && b.h < 1) return;
+        if (b.x < SAFE.x0 - 1 || b.x + b.w > SAFE.x1 + 1 || b.y < SAFE.y0 - 1 || b.y + b.h > SAFE.y1 + 1)
+          add(t, `out-${lintDesc(el)}`, `越界或进入字幕区:${lintDesc(el)} 位于 x ${b.x | 0}–${(b.x + b.w) | 0}, y ${b.y | 0}–${(b.y + b.h) | 0}`);
+        if (el.tagName === 'text' && String(el.textContent).trim()) texts.push({ el, b });
+      });
+      for (let i = 0; i < texts.length; i += 1) for (let j = i + 1; j < texts.length; j += 1) {
+        const A = texts[i].b, B = texts[j].b;
+        const ix = Math.max(0, Math.min(A.x + A.w, B.x + B.w) - Math.max(A.x, B.x));
+        const iy = Math.max(0, Math.min(A.y + A.h, B.y + B.h) - Math.max(A.y, B.y));
+        if (ix * iy > .25 * Math.min(A.w * A.h, B.w * B.h)) add(t, `ov-${lintDesc(texts[i].el)}-${lintDesc(texts[j].el)}`, `文字重叠:${lintDesc(texts[i].el)} × ${lintDesc(texts[j].el)}`);
+      }
+      if (texts.length > 10) add(t, `many-${Math.floor(t * 4)}`, `同屏文字 ${texts.length} 处,超过 10 处`);
+      SPR.forEach(sprite => {
+        if (!sprite.el || getComputedStyle(sprite.el).visibility !== 'visible') return;
+        for (let node = sprite.el.parentNode; node && node.id !== 'cam'; node = node.parentNode)
+          if (node.style && node.style.visibility === 'hidden') { add(t, `hid-${lintDesc(sprite.el)}`, `父组已隐藏,子精灵仍在显示:${lintDesc(sprite.el)}`); break; }
+      });
+    }
+    render(back0);
+    issues.sort((a, b) => a[0] - b[0]);
+    showPanel(issues, issues.length ? `✗ 检查发现 ${issues.length} 个问题(点击跳转)` : '检查结果');
+    if (typeof console !== 'undefined') console.table(issues.map(([t, msg]) => ({ 时间: (+t).toFixed(2), 问题: msg })));
+  }
+
+  function boot({ T0, END, TOTAL = END, SUBS = [], CAM = [[0, [820, 1]]], theme, audio, audioOffset = T0, SHAKE = [] }) {
     if (theme) applyTheme(theme);
     const ctx = $('bg').getContext('2d'), cam = $('cam'), sub = $('sub');
     const EXPORT = /(?:\?|&)export(?:=|&|$)/.test(location.search);
@@ -411,8 +536,10 @@
 
     function render(t) {
       const [cy, zoom] = kf(t, CAM);
+      let shake = 0;
+      SHAKE.forEach(([a, b, amp]) => { if (t > a && t < b) shake += Math.sin((t - a) * 95) * amp * (1 - p(t, a, b)); });
       drawBG(ctx, t, cy, zoom);
-      cam.setAttribute('transform', `translate(540 820) scale(${zoom}) translate(-540 ${-cy})`);
+      cam.setAttribute('transform', `translate(${540 + shake} 820) scale(${zoom}) translate(-540 ${-cy})`);
       for (const sprite of SPR) {
         const on = t >= sprite.t0 && t <= sprite.t1;
         if (sprite.el) sprite.el.style.visibility = on ? 'visible' : 'hidden';
@@ -485,21 +612,29 @@
     }
     requestAnimationFrame(tick);
     if (location.search.includes('auto')) setPlay(true);
+    if (/[?&]lint/.test(location.search)) {
+      const schedule = typeof setTimeout === 'function' ? fn => setTimeout(fn, 200) : fn => fn();
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => schedule(() => runLint(render, T0, END, SUBS, cur)));
+    }
     return { render, sprites: SPR };
   }
 
   const api = {
-    W, H, D, NS, DEFAULT_THEME, L, SPR, initStage, S, upd, act, V, kf, route,
+    W, H, D, NS, DEFAULT_THEME, SAFE, L, SPR, initStage, S, upd, act, V, kf, route,
     clamp, p, lin, eo, eio, back, lerpA, qb, op, at, setL, mk, txt, G, rect, T, TM,
     pill, P, TX, LN, CNT, icon, door, makeHub, mkFig, poseFig, figAct, figHand,
-    imgCard, imgMark, morphRect, zoomThrough, hop, gather, emit, scatter, unroll,
+    imgCard, imgMark, morphRect, setBox, zoomThrough, hop, gather, emit, scatter, unroll,
     bend, retract, project, depthScale, snapshotState, applyTheme, boot, io, ps,
+    vlen, lintStatic, runLint, showPanel,
     get theme() { return THEME; }, get MONO() { return MONO; }, get CY() { return CY; },
     get BL() { return BL; }, get MG() { return MG; }, get VI() { return VI; },
     get GY() { return GY; }, get AM() { return AM; }, get OKC() { return OKC; },
     get ERR() { return ERR; }, get SUBC() { return SUBC; }, get DIM() { return DIM; }
   };
   root.MotionEngine = api;
+  if (typeof root.addEventListener === 'function') {
+    root.addEventListener('error', event => showPanel([[0, `脚本错误:${(event.error && event.error.message) || event.message || '未知错误'}`]], '✗ 运行出错'));
+  }
   for (const [key, value] of Object.entries(api)) {
     if (key === 'theme' || ['MONO', 'CY', 'BL', 'MG', 'VI', 'GY', 'AM', 'OKC', 'ERR', 'SUBC', 'DIM'].includes(key)) continue;
     if (!(key in root)) root[key] = value;
