@@ -257,7 +257,8 @@ function renderSamplePlan() {
 function updatePreview() {
   const profile = state.mode === 'product' && state.profile ? state.profile : DEMO_PROFILE;
   const labels = {
-    mode: state.mode === 'product' ? '网页产品轨道' : '无产品轨道', style: state.style === 'cream-neon' ? '奶油 × 荧绿' : '深色插画叙事',
+    mode: state.mode === 'product' ? '网页产品轨道' : '无产品轨道',
+    style: { 'cream-neon': '奶油 × 荧绿', 'dark-narrative': '深色插画叙事', 'cheeseheart-tech': '芝士心 · 荧光绿科技' }[state.style],
     fidelity: { faithful: '原界面', component: '组件级重绘', abstract: '品牌化抽象' }[state.fidelity],
     intensity: { subtle: '克制', balanced: '均衡', showreel: '强展示' }[state.intensity]
   };
