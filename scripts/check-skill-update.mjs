@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 
 const repository = 'MarkCheese523/cheese_animation_video';
 const branch = 'main';
@@ -43,7 +43,10 @@ async function fetchRemoteCommit() {
 const root = new URL('../', import.meta.url).pathname;
 const version = JSON.parse(await readFile(new URL('../skill-version.json', import.meta.url), 'utf8'));
 let installedCommit = version.commit;
-try { installedCommit = await run('git', ['-C', root, 'rev-parse', 'HEAD']); } catch { /* 非 Git 安装使用随包版本记录。 */ }
+try {
+  const gitRoot = await run('git', ['-C', root, 'rev-parse', '--show-toplevel']);
+  if (await realpath(gitRoot) === await realpath(root)) installedCommit = await run('git', ['-C', root, 'rev-parse', 'HEAD']);
+} catch { /* 非 Git 安装或外层项目内的副本使用随包版本记录。 */ }
 const localCommit = option('--local') || installedCommit;
 const base = { repository: `https://github.com/${repository}`, branch, localCommit };
 try {
