@@ -1,4 +1,4 @@
-# Motion Layer · 当前对话 Agent 交接
+# Cheese Motion · 当前对话 Agent 交接
 
 ## 职责边界
 
@@ -17,7 +17,7 @@
 
 ## 触发与输入
 
-当用户消息包含“请处理 Motion Layer Agent 任务 motion-…”时：
+当用户消息包含“请处理 Cheese Motion Agent 任务 motion-…”时：
 
 1. 先调用 `html-animation-video` skill。
 2. 读取任务目录中的 `job.json`、`analysis.schema.json` 和 `request.md`。

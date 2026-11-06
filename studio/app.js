@@ -297,12 +297,12 @@ async function loadCandidates(slot, grid, button) {
     candidates = await searchBrandCandidates(slot);
   } else if (localOnly) {
     candidates = [{
-      id: `${slot.id}-A`, name: slot.semanticName, author: 'Motion Layer', license: slot.rights,
+      id: `${slot.id}-A`, name: slot.semanticName, author: 'Cheese Motion', license: slot.rights,
       fallback: true, semantic: true, visualKind: slot.visualKind, abstractOnly: slot.abstractOnly, slot: slot.id
     }];
     if (!slot.abstractOnly) candidates.push({
       id: `${slot.id}-B`, name: '仅使用文字／数字节点',
-      author: 'Motion Layer', license: '不制作具象资产，只保留文字、数字与关系。',
+      author: 'Cheese Motion', license: '不制作具象资产，只保留文字、数字与关系。',
       fallback: true, abstractOnly: true, slot: slot.id
     });
   } else {
@@ -313,7 +313,7 @@ async function loadCandidates(slot, grid, button) {
       ...candidate, license: searchFailed ? '联网检索连接失败；当前为本地备用，点击重新找图可重试。' : '联网未找到匹配素材；当前为本地备用。'
     }));
     candidates = [...candidates.slice(0, 5), {
-      id: `semantic-${slot.id}`, name: `${slot.concept} · 抽象文字／关系备选`, author: 'Motion Layer',
+      id: `semantic-${slot.id}`, name: `${slot.concept} · 抽象文字／关系备选`, author: 'Cheese Motion',
       license: '不猜测具体物体或人物；仅保留文字、数字与关系，无外部参考。',
       fallback: true, semantic: true, abstractOnly: true, slot: slot.id
     }];
@@ -590,7 +590,7 @@ function storyboardInput() {
   const edits = beatInput();
   const beats = edits.map(edit => ({ ...(state.analysis?.beats.find(beat => beat.id === edit.id) || {}), ...edit }));
   return {
-    title: 'Motion Layer · 本期制作整包', mode: state.mode, style: state.style,
+    title: 'Cheese Motion · 本期制作整包', mode: state.mode, style: state.style,
     profile: state.mode === 'product' ? state.profile : DEMO_PROFILE,
     fidelity: state.fidelity, intensity: state.intensity, script: $('#scriptInput').value, aspect: $('#aspectInput').value,
     beats, confirmations: { ...state.confirmations }, agentJobId: state.jobId, agentAnalysis: state.analysis,

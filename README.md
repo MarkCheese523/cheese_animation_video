@@ -1,6 +1,6 @@
 # HTML Animation Video
 
-通用 HTML/SVG 时间轴动画视频工程，也是 `html-animation-video` 技能的开发母本。根页面为 Motion Layer 双轨设计台：输入脚本与方向后，依次经过「分镜确认 → 找图确认 → 重绘母版确认」三个独立页面，全部确认后进入两段代表样片和完整网页预览。
+通用 HTML/SVG 时间轴动画视频工程，也是 `html-animation-video` 技能的开发母本。根页面为 Cheese Motion 双轨设计台：输入脚本与方向后，依次经过「分镜确认 → 找图确认 → 重绘母版确认」三个独立页面，全部确认后进入两段代表样片和完整网页预览。
 
 本仓库只保留通用代码、模板、测试与规范，不包含具体视频案例的脚本、配音、素材、确认板或预览产物。
 
@@ -16,7 +16,7 @@ npm run dev -- --host 127.0.0.1 --port 7100
 
 打开 `http://localhost:7100/`。无需 npm 依赖安装。
 
-Motion Layer 支持：
+Cheese Motion 支持：
 
 - 双轨整包输入：无产品风格探索，或公开网页 URL／截图的产品风格提取；脚本、SRT、配音、截图、录屏、画幅和补充说明在同一页面提交。
 - Product Profile：色板、字体、圆角、组件与 `brandAssets` 品牌资产；真实产品素材仍需确认。
@@ -47,7 +47,7 @@ python -m pip install -r requirements.txt
 ```text
 SKILL.md                  技能主规则与创作 SOP
 references/               Agent、资产、设计、命令、回归与交付规范
-index.html                Motion Layer 双轨设计台入口
+index.html                Cheese Motion 双轨设计台入口
 studio/                   双轨配置、素材候选、母版与制作交接界面
 agent-flow.mjs            分镜与素材 Agent 任务契约
 production-flow.mjs       母版、样片与全片 Agent 任务契约

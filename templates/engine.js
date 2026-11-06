@@ -1,5 +1,5 @@
 /* =====================================================================
- * Motion Layer continuous-stage engine v2.0
+ * Cheese Motion continuous-stage engine v2.0
  * One SVG stage, deterministic Sprite windows, Carry helpers and 2.5D.
  * Classic browser script: initStage() -> build sprites -> boot({...}).
  * Node tests may evaluate this file in a VM and use global MotionEngine.

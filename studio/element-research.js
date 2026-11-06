@@ -107,7 +107,7 @@ async function searchBrandCandidates(slot) {
     seen.add(source); return true;
   }).slice(0, 5);
   return [...real, {
-    id: `text-${slot.id}`, name: `${slot.concept} · 纯文字备用`, author: 'Motion Layer',
+    id: `text-${slot.id}`, name: `${slot.concept} · 纯文字备用`, author: 'Cheese Motion',
     license: real.length
       ? '没有选用互联网真实矢量时的完整文字排版；不得绘制近似 Logo。'
       : `互联网未找到可靠品牌矢量${failed ? '（检索服务连接失败）' : ''}；当前仅提供纯文字备用，不得绘制近似 Logo。`,

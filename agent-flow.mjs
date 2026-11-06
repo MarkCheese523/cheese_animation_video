@@ -50,7 +50,7 @@ function cleanAttachments(input) {
 function handoffPrompt(jobId) {
   const directory = `studio/agent-jobs/${jobId}`;
   return [
-    `请处理 Motion Layer Agent 任务 ${jobId}。`,
+    `请处理 Cheese Motion Agent 任务 ${jobId}。`,
     `读取 ${directory}/job.json 与 ${directory}/analysis.schema.json，使用 html-animation-video skill 对输入整包进行真实语义拆解。`,
     `请生成本期分镜与素材需求（包括脚本和品牌中的 Logo，不要要求用户预先列清单），将结果写入 ${directory}/analysis.json。`,
     '只写结构化结果，不替用户确认分镜、参考或母版；完成后回复“拆解已回写”。'
