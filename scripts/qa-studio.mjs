@@ -144,7 +144,7 @@ try {
   await cdp('Page.navigate', { url: `http://127.0.0.1:${port}/studio/` });
   await waitExpression(`document.readyState === 'complete' && !!document.querySelector('#startMotion') && !!document.querySelector('#samplePlan')`);
   if (await evaluate(`document.querySelector('#demoFrame') || document.querySelector('#generateStoryboard') || document.querySelector('#sampleFrame').hasAttribute('src')`)) throw new Error('初始页面不应加载通用播放器或旧生成入口');
-  if (await evaluate(`document.querySelectorAll('.style-card').length`) !== 2) throw new Error('无产品风格选项缺失');
+  if (await evaluate(`document.querySelectorAll('.style-card').length`) !== 3) throw new Error('产品风格选项数量与页面不符');
   if (!await evaluate(`document.querySelector('#direction #scriptInput') && !document.querySelector('#elements #scriptInput')`)) throw new Error('脚本输入未归入方向阶段');
   if (!await evaluate(`document.querySelector('#motion').compareDocumentPosition(document.querySelector('#elements')) === Node.DOCUMENT_POSITION_FOLLOWING && document.querySelector('#elements').compareDocumentPosition(document.querySelector('#redraw')) === Node.DOCUMENT_POSITION_FOLLOWING && document.querySelector('#redraw').compareDocumentPosition(document.querySelector('#preview')) === Node.DOCUMENT_POSITION_FOLLOWING && document.querySelector('#preview').compareDocumentPosition(document.querySelector('#film')) === Node.DOCUMENT_POSITION_FOLLOWING`)) throw new Error('阶段顺序应为分镜→找图→重绘→两段样片→全片');
   if (!await evaluate(`document.querySelectorAll('[data-page]:not([hidden])').length === 1 && !document.querySelector('#direction').hidden && document.querySelector('#confirmSamples').disabled && document.querySelector('[data-step="film"]').disabled`)) throw new Error('初始页面或制作闸门不正确');
@@ -156,6 +156,11 @@ try {
   if (!realBrandCandidates.some(candidate => candidate.web && candidate.svg?.includes('upload.wikimedia.org') && candidate.sourceUrl?.includes('commons.wikimedia.org'))) throw new Error('品牌未进入互联网真实矢量与来源页通道');
   const amazonCandidates = await evaluate(`searchBrandCandidates({ id: 'TEST', concept: '亚马逊官方品牌标识', semanticName: 'Amazon', query: 'Amazon official logo SVG', brandAssets: [], brandOnly: true, researchRoute: 'web' })`);
   if (!amazonCandidates.some(candidate => candidate.web && candidate.svg?.includes('upload.wikimedia.org'))) throw new Error('亚马逊未返回互联网真实品牌矢量');
+  const srtFixture = path.join(root, 'scripts', 'fixtures', 'demo.srt');
+  await cdp('DOM.enable');
+  const doc = await cdp('DOM.getDocument', { depth: 1 });
+  const attachmentInput = await cdp('DOM.querySelector', { nodeId: doc.root.nodeId, selector: '#attachmentInput' });
+  await cdp('DOM.setFileInputFiles', { files: [srtFixture], nodeId: attachmentInput.nodeId });
   await evaluate(`document.querySelector('[data-mode="product"]').click(); document.querySelector('#demoProduct').click(); document.querySelector('#startMotion').click()`);
   await waitExpression(`!document.querySelector('#productProfile').hidden && !document.querySelector('#motion').hidden && !document.querySelector('#agentHandoff').hidden && document.querySelector('#agentPrompt').value`);
   if (!await evaluate(`document.querySelector('#confirmMotion').disabled && document.querySelectorAll('.beat-row').length === 0`)) throw new Error('Agent 回写前不得显示预填分镜或允许确认');
@@ -330,6 +335,9 @@ try {
 
   await cdp('Page.navigate', { url: `http://127.0.0.1:${port}/studio/` });
   await waitExpression(`document.readyState === 'complete' && !!document.querySelector('#startMotion')`);
+  const freshDoc = await cdp('DOM.getDocument', { depth: 1 });
+  const freshAttachmentInput = await cdp('DOM.querySelector', { nodeId: freshDoc.root.nodeId, selector: '#attachmentInput' });
+  await cdp('DOM.setFileInputFiles', { files: [srtFixture], nodeId: freshAttachmentInput.nodeId });
   await evaluate(`(() => {
     document.querySelector('[data-mode="generic"]').click();
     const script = document.querySelector('#scriptInput'); script.value = 'AsterQuark 与 Northstar 建立连接。'; script.dispatchEvent(new Event('input', { bubbles: true }));
