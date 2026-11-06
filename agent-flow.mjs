@@ -16,7 +16,7 @@ const ACTIONS = {
   resolve: ['logo-resolve', 'hero-hold']
 };
 const MODES = new Set(['generic', 'product']);
-const STYLES = new Set(['cream-neon', 'dark-narrative']);
+const STYLES = new Set(['cream-neon', 'dark-narrative', 'cheeseheart-tech']);
 const INTENSITIES = new Set(['subtle', 'balanced', 'showreel']);
 const FIDELITIES = new Set(['faithful', 'component', 'abstract']);
 const VISUAL_KINDS = new Set(['generic', 'company', 'institution', 'fund', 'trust', 'voting', 'chair', 'vote']);

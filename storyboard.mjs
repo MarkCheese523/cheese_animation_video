@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const OUTPUT = path.resolve('studio/generated');
 const MODES = new Set(['generic', 'product']);
-const STYLES = new Set(['cream-neon', 'dark-narrative']);
+const STYLES = new Set(['cream-neon', 'dark-narrative', 'cheeseheart-tech']);
 const INTENSITIES = new Set(['subtle', 'balanced', 'showreel']);
 const FIDELITIES = new Set(['faithful', 'component', 'abstract']);
 const DEFAULT_TOKENS = { accent: '#c6ff3d', background: '#f4f0e6', ink: '#102a22', radius: '16px', fontFamily: '系统无衬线' };
@@ -97,6 +97,11 @@ export function buildStoryboard(input = {}) {
   };
   if (style === 'dark-narrative' && mode === 'generic') {
     profile.tokens.accent = '#c6ff3d'; profile.tokens.background = '#071b15'; profile.tokens.ink = '#eff5e7';
+  }
+  if (style === 'cheeseheart-tech' && mode === 'generic') {
+    profile.tokens.accent = '#bcf500'; profile.tokens.background = '#050704'; profile.tokens.ink = '#dfff9e';
+    profile.tokens.fontFamily = 'PingFang SC / JetBrains Mono';
+    profile.components = ['HUD 括角', 'chip', 'pill', 'card', 'imgCard', 'bar', 'table', 'icon', 'LN', 'scan'];
   }
   const elements = (Array.isArray(input.elements) ? input.elements : []).slice(0, 18).map(cleanElement);
   const agentJobId = text(input.agentJobId, '', 60);

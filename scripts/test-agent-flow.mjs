@@ -7,7 +7,7 @@ import { makeAgentAnalysis } from './fixtures/agent-analysis.mjs';
 
 const srtAttachment = { name: 'voice.srt', url: '/studio/agent-inbox/00000000-0000-0000-0000-000000000000-voice.srt', kind: 'attachment' };
 await assert.rejects(() => createAgentJob({ script: '只有脚本，没有 SRT' }), /SRT/);
-const job = await createAgentJob({ script: '', mode: 'generic', style: 'cream-neon', aspect: '9:16', attachments: [srtAttachment] });
+const job = await createAgentJob({ script: '', mode: 'generic', style: 'cheeseheart-tech', aspect: '9:16', attachments: [srtAttachment] });
 const directory = path.resolve('studio/agent-jobs', job.jobId);
 try {
   assert.match(job.jobId, /^motion-[a-f0-9-]{36}$/);

@@ -244,6 +244,7 @@ flowchart TD
 - `references/regression-qa.md` —— 全量回归清单（L1/L2/L3 分级 + 自动/半自动/人工三层）
 - `references/qa-delivery.md` —— **交付前 QA 全流程**（机器八项 + contact sheet + 逐页目测清单 + 历史教训索引；原 html-animation-video-qa skill 已并入，唯一 QA 标准）
 - `references/design-aesthetic.md` —— 设计审美层：70 分差距诊断 + 四步建设路线 + 采购清单 + 复盘记录
+- `references/cheeseheart-style/README.md` —— **芝士心 · 荧光绿科技**（`cheeseheart-tech`）完整皮肤：近黑底、荧光绿、品红/紫点缀、等宽数据、HUD、构件、动效与样张；选择该风格时必须通读并遵循，仍复用主引擎与全部叙事/确认/导出闸门
 - `references/asset-pipeline.md` —— **素材资产定稿与复用流程**（素材清单、候选参考、两道主动确认闸门、风格化母版、变体、授权记录与资产 QA）
 - 独立开发工程：`~/dev/html-animation-video/`（唯一引擎与资产流程母本，跨项目复用；可用 `HTML_ANIMATION_VIDEO_ROOT` 覆盖）
 - 通用参考实现：`assets/template/`（只含模板与演示数据；具体视频案例、配音、素材和确认产物不进入通用仓库）
