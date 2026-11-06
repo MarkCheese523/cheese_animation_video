@@ -107,7 +107,7 @@ async function searchBrandCandidates(slot) {
     seen.add(source); return true;
   }).slice(0, 5);
   return [...real, {
-    id: `text-${slot.id}`, name: `${slot.concept} · 纯文字备用`, author: 'Motion Layer',
+    id: `text-${slot.id}`, name: `${slot.concept} · 纯文字备用`, author: 'Cheese Motion',
     license: real.length
       ? '没有选用互联网真实矢量时的完整文字排版；不得绘制近似 Logo。'
       : `互联网未找到可靠品牌矢量${failed ? '（检索服务连接失败）' : ''}；当前仅提供纯文字备用，不得绘制近似 Logo。`,
@@ -118,6 +118,6 @@ async function searchBrandCandidates(slot) {
 function fallbackCandidates(slot) {
   return [slot.fallback, 'lucide:shapes', 'lucide:sparkles'].map((id, index) => ({
     id: index === 0 ? id : `${id}-${index}`, name: index === 0 ? (FALLBACK_LABELS[id] || slot.concept) : '抽象辅助元素',
-    style: '本地回退', author: '通用几何', license: '待制作母版', fallback: true, slot: slot.id
+    style: '本地备选', author: '通用几何', license: '待 AI 重绘', fallback: true, slot: slot.id
   }));
 }

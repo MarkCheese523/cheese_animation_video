@@ -1,4 +1,4 @@
-# Motion Layer · 当前对话 Agent 交接
+# Cheese Motion · 当前对话 Agent 交接
 
 ## 职责边界
 
@@ -17,7 +17,7 @@
 
 ## 触发与输入
 
-当用户消息包含“请处理 Motion Layer Agent 任务 motion-…”时：
+当用户消息包含“请处理 Cheese Motion Agent 任务 motion-…”时：
 
 1. 先调用 `html-animation-video` skill。
 2. 读取任务目录中的 `job.json`、`analysis.schema.json` 和 `request.md`。
@@ -28,7 +28,7 @@
 
 ## 反向入口（无任务提示时）
 
-用户直接提出视频需求、消息中没有「请处理 Motion Layer Agent 任务」提示时，Agent 不得改用对话逐项询问收集输入，而是先启动设计台服务（探测 `http://127.0.0.1:7100/` 是否已在服务本工程，未运行则 `npm run dev -- --host 127.0.0.1 --port 7100`，端口被其他目录占用则换端口），把设计台 URL 发给用户，请其在页面一次性提交整包；页面生成任务提示后按上一节契约执行。`AskUserQuestion` 只用于本 skill 规定的确认闸门，不用于收集输入整包。
+用户直接提出视频需求、消息中没有「请处理 Cheese Motion Agent 任务」提示时，Agent 不得改用对话逐项询问收集输入，而是先启动设计台服务（探测 `http://127.0.0.1:7100/` 是否已在服务本工程，未运行则 `npm run dev -- --host 127.0.0.1 --port 7100`，端口被其他目录占用则换端口），把设计台 URL 发给用户，请其在页面一次性提交整包；页面生成任务提示后按上一节契约执行。`AskUserQuestion` 只用于本 skill 规定的确认闸门，不用于收集输入整包。
 
 ## 拆解要求
 

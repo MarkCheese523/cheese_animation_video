@@ -54,4 +54,4 @@
 
 ## 分镜产物
 
-使用 `templates/storyboard.md`，至少包含持续主体形态链、逐句分镜、承接规划表、Sprite 时间窗、数据来源与待确认事项。分镜确认仍走现有 Motion Layer 契约，Agent 不替用户确认。
+使用 `templates/storyboard.md`，至少包含持续主体形态链、逐句分镜、承接规划表、Sprite 时间窗、数据来源与待确认事项。分镜确认仍走现有 Cheese Motion 契约，Agent 不替用户确认。

@@ -19,7 +19,7 @@ function directory(jobId) {
 function prompt(jobId, stage) {
   const dir = `studio/production-jobs/${jobId}`;
   if (stage === 'masters') return [
-    `请处理 Motion Layer 风格化母版任务 ${jobId}。`,
+    `请处理 Cheese Motion 风格化母版任务 ${jobId}。`,
     `读取 ${dir}/job.json 与 ${dir}/masters.schema.json，使用 html-animation-video skill 的素材双确认流程。`,
     '输入包中的分镜与参考已经用户明确确认。请由 Agent 对照每项已确认参考真实绘制风格化母版，不得用 CSS 滤镜、原图换色或本地通用图形冒充重绘。',
     '保留各项轮廓、比例、动作和识别特征，按本期风格输出墨色、荧绿强调、深色反白等适用变体；品牌必须保持官方路径、字形与比例，人物不得重建五官，抽象项不得补画具象实物。',
@@ -27,14 +27,14 @@ function prompt(jobId, stage) {
     '只制作并回写母版，不替用户确认母版，不制作样片或全片。完成后回复“风格化母版已回写”。'
   ].join('\n');
   if (stage === 'samples') return [
-    `请处理 Motion Layer 两段代表样片任务 ${jobId}。`,
+    `请处理 Cheese Motion 两段代表样片任务 ${jobId}。`,
     `读取 ${dir}/job.json 与 ${dir}/samples.schema.json，使用 html-animation-video skill，并严格沿用老 skill 的两段代表样片闸门。`,
     '输入包中的分镜、参考和母版已由用户确认。先形成简短 design brief，只制作一段本期视觉开场和一段本期核心机制的真实网页样片；调用已确认资产，不得使用通用 motion-study 或固定演示冒充本期内容。',
     '样片必须包含本期旁白、字幕和确定性动效；有 SRT 时逐句对轴，没有 SRT 时不要伪造精确对轴。完成浏览器与关键帧 QA，将可播放网页写入本任务目录，并将结构化结果写入 samples.json。',
     `只制作两段样片，不生成全片，不替用户确认样片，不导出 MP4。完成后回复“两段样片已回写”。结果契约见 ${dir}/samples.schema.json。`
   ].join('\n');
   return [
-    `请处理 Motion Layer 全片预览任务 ${jobId}。`,
+    `请处理 Cheese Motion 全片预览任务 ${jobId}。`,
     `读取 ${dir}/job.json 与 ${dir}/film.schema.json，使用 html-animation-video skill。输入包中的两段代表样片已由用户明确确认。`,
     '复用已确认母版、design brief 和两段样片的动效语言，按本期脚本与 SRT 铺开其余场景，完成连续时间轴、字幕、音频、浏览器和关键帧 QA。',
     `将完整网页预览写入本任务目录，并将结构化结果写入 ${dir}/film.json。只交付网页，不导出 MP4，不替用户确认最终导出。完成后回复“全片预览已回写”。`
