@@ -5,7 +5,9 @@ import path from 'node:path';
 import { createAgentJob, readAgentJob, readLatestAgentJob, saveAgentAnalysis, saveAgentDraft, uploadAgentAsset, validateAgentAnalysis } from '../agent-flow.mjs';
 import { makeAgentAnalysis } from './fixtures/agent-analysis.mjs';
 
-const job = await createAgentJob({ script: 'AsterQuark 将凭证拆分并同步。', mode: 'generic', style: 'cream-neon', aspect: '9:16' });
+const srtAttachment = { name: 'voice.srt', url: '/studio/agent-inbox/00000000-0000-0000-0000-000000000000-voice.srt', kind: 'attachment' };
+await assert.rejects(() => createAgentJob({ script: '只有脚本，没有 SRT' }), /SRT/);
+const job = await createAgentJob({ script: '', mode: 'generic', style: 'cream-neon', aspect: '9:16', attachments: [srtAttachment] });
 const directory = path.resolve('studio/agent-jobs', job.jobId);
 try {
   assert.match(job.jobId, /^motion-[a-f0-9-]{36}$/);
@@ -14,7 +16,8 @@ try {
   const pending = await readAgentJob(job.jobId);
   assert.equal(pending.status, 'awaiting_agent');
   assert.equal(pending.analysis, null);
-  assert.equal(pending.job.script.includes('AsterQuark'), true);
+  assert.equal(pending.job.script, '');
+  assert.equal(pending.job.attachments.some(item => item.name.endsWith('.mp3')), false);
 
   const analysis = makeAgentAnalysis(job.jobId, { brands: [{ name: 'AsterQuark', query: 'asterquark' }] });
   await saveAgentAnalysis(job.jobId, analysis);

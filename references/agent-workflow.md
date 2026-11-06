@@ -21,8 +21,8 @@
 
 1. 先调用 `html-animation-video` skill。
 2. 读取任务目录中的 `job.json`、`analysis.schema.json` 和 `request.md`。
-3. 阅读脚本及 `attachments` 中的本期附件；产品模式同时读取 `profile` 和 `brandAssets`。
-4. 按本 skill 的叙事、动作、素材双确认规则进行真实分析。
+3. **SRT 是唯一必需输入**；文字脚本与 MP3／M4A 等音频均可选。读取 `attachments` 中的 SRT 搭建骨架；有脚本则辅助理解与纠错，有音频则接入主时钟，只有 SRT 时按无声网页预览制作。产品模式同时读取 `profile` 和 `brandAssets`。
+4. 按本 skill 的叙事、动作、素材双确认规则进行真实分析，不要求用户补交可选脚本或音频。
 
 `analysis.schema.json` 是结构示例，不是要照抄的内容。不得替用户通过分镜、参考或母版确认。
 

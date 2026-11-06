@@ -59,7 +59,10 @@ function handoffPrompt(jobId) {
 
 export async function createAgentJob(input = {}) {
   const script = text(input.script, '', 16000);
-  if (!script) throw new Error('请先填写画面脚本');
+  const attachments = cleanAttachments(input.attachments);
+  if (!attachments.some(item => item.name.toLowerCase().endsWith('.srt') || item.url.toLowerCase().endsWith('.srt'))) {
+    throw new Error('请至少上传一份 SRT 字幕；MP3 配音和文字脚本均可选');
+  }
   const mode = MODES.has(input.mode) ? input.mode : 'generic';
   const jobId = `motion-${randomUUID()}`;
   const directory = jobDirectory(jobId);
@@ -70,7 +73,7 @@ export async function createAgentJob(input = {}) {
     fidelity: FIDELITIES.has(input.fidelity) ? input.fidelity : 'component',
     aspect: ['16:9', '9:16', '1:1'].includes(input.aspect) ? input.aspect : '9:16',
     notes: text(input.notes, '', 4000), profile: cleanProfile(input.profile, mode),
-    attachments: cleanAttachments(input.attachments), status: 'awaiting_agent'
+    attachments, status: 'awaiting_agent'
   };
   const schema = {
     jobId,
