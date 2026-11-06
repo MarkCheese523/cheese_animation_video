@@ -9,6 +9,7 @@ description: 一切视频制作与视频剪辑需求的唯一入口（铁律）�
 
 ## 〇、启动铁律（2026-09-30 Bella 定死，最高优先级，任何视频需求开工前必想清楚）
 
+0. **每次启动先检查远端更新（2026-11-06 用户确认）**：读取本 skill 后、开始任何制作或修改前，在本 skill 目录执行 `node scripts/check-skill-update.mjs`。脚本对比 `skill-version.json` 的本地提交与远端 `main`。仅当返回 `updateAvailable: true` 时，必须调用 `AskUserQuestion` 提醒“远端技能有更新”，询问“先更新 skill 再工作”还是“暂不更新，继续本期”；只有用户明确选择更新后才可更新，更新完成须通过测试并把远端提交写回 `skill-version.json`。用户不更新或未作答则沿用当前版本。`up-to-date` 直接工作；`unavailable` 不阻塞、不骚扰用户，也不把检查失败说成已是最新。严禁未经确认自动覆盖本地技能。
 1. **一切视频/剪辑相关需求——引擎方法、平面设计与审美、验收 QA——唯一入口是本 skill。** 开工第一动作：读本 skill + 定位独立开发工程 `~/dev/html-animation-video/`（可用 `HTML_ANIMATION_VIDEO_ROOT` 覆盖）。禁止重写引擎、禁止新建并行工作流/姊妹 skill、禁止「新项目 → 新文件」的任何变体。
 2. **引擎只开发一次。** 独立工程包含 `assets/template/player.*` 时间轴播放器、`dev-server.mjs` 静态服务、`scripts/qa_*.py` 关键帧检查和完整 references。每期新增成本 = 配音 + SRT + 场景配置；任何超出「填配置」的新开发，必须先向用户报成本和方案，确认后才动手。
 3. **skill 覆盖不了的部分，先对齐再开发。** 不存在「默认动作」「肌肉记忆」——跳过 SOP 从来不是一个可选项（2026-09-30 中网项目根因：绕开本 skill 从零重写引擎，把已付过的成本重新付了一遍，还附赠一遍新 bug）。
