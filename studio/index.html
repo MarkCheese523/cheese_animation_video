@@ -60,12 +60,12 @@
             <img id="screenshotPreview" alt="产品截图预览" hidden>
           </article>
         </div>
-        <div class="direction-script"><label class="script-label" for="scriptInput">画面脚本</label><textarea id="scriptInput" rows="5">凭证拆分后可以转让，过期后失效。点击确认，数据同步完成。</textarea><p class="field-note">这里只输入内容；Agent 会在提交后理解语义、拆出分镜和品牌等素材需求。</p></div>
+        <div class="direction-script"><label class="script-label" for="scriptInput">画面脚本 <small>可选</small></label><textarea id="scriptInput" rows="5" placeholder="可不填写；Agent 会直接以 SRT 拆解"></textarea><p class="field-note">脚本只辅助语义理解与纠错；不提供不会影响提交。</p></div>
         <div class="input-grid">
           <label>画幅<select id="aspectInput"><option value="9:16">9:16 竖屏</option><option value="16:9">16:9 横屏</option><option value="1:1">1:1 方形</option></select></label>
           <label>补充说明<input id="notesInput" placeholder="必须出现、需要避开或特别强调的内容"></label>
         </div>
-        <div class="attachment-field"><label for="attachmentInput">本期附件</label><input id="attachmentInput" type="file" multiple accept=".srt,.txt,.md,.json,.mp3,.wav,.m4a,.png,.jpg,.jpeg,.webp,.svg,.mp4,.mov,.webm"><p class="field-note">可一次选择 SRT、配音、截图与录屏；附件随整包交给 Agent。</p><ul id="attachmentList" class="attachment-list"></ul></div>
+        <div class="attachment-field"><label for="attachmentInput">本期附件 · SRT 必需</label><input id="attachmentInput" type="file" multiple accept=".srt,.txt,.md,.json,.mp3,.wav,.m4a,.png,.jpg,.jpeg,.webp,.svg,.mp4,.mov,.webm"><p class="field-note">至少上传一份 SRT；MP3／M4A 配音和文字脚本均可选。只有 SRT 时先制作无声网页预览。</p><ul id="attachmentList" class="attachment-list"></ul></div>
         <div id="draftNotice" class="draft-notice" hidden><div><b>发现此浏览器保存的草稿</b><span id="draftNoticeMeta">可继续上次制作进度</span></div><button id="loadDraft" class="secondary" type="button">继续上次草稿 →</button></div>
         <div class="page-actions"><span>确认整包后，由 Agent 生成实际分镜与素材清单。</span><button id="startMotion" class="primary" type="button">确认输入并交给 Agent <span>→</span></button></div>
       </section>

@@ -438,6 +438,7 @@ $('#startMotion').addEventListener('click', async () => {
   try {
     resetAgentAnalysis();
     const attachments = await uploadAttachments();
+    if (!attachments.some(item => item.name.toLowerCase().endsWith('.srt'))) throw new Error('请至少上传一份 SRT 字幕；MP3 配音和文字脚本均可选');
     const response = await fetch('/api/agent-jobs', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
