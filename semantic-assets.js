@@ -69,6 +69,93 @@ function saGenericFigure() {
   return group;
 }
 
+function saModuleCard(x, y, width, height, color) {
+  const group = el('g', { transform: `translate(${x} ${y})` });
+  el('rect', { x: 5, y: 7, width, height, rx: 12, fill: FULL_COLORS.ink, opacity: .16 }, group);
+  el('rect', { x: 0, y: 0, width, height, rx: 12, fill: '#fffdf7', stroke: FULL_COLORS.ink, 'stroke-width': 5 }, group);
+  el('rect', { x: 0, y: 0, width, height: 10, rx: 5, fill: color }, group);
+  el('rect', { x: 10, y: 18, width: width - 20, height: height - 28, rx: 6, fill: 'url(#dotFill)', opacity: .14 }, group);
+  return group;
+}
+
+function saCapabilityModules() {
+  const group = el('g', { filter: 'url(#shadow)' });
+  const specs = [
+    [-142, -123, FULL_COLORS.blue, '01'], [12, -123, FULL_COLORS.green, '02'],
+    [-142, 12, FULL_COLORS.purple, '03'], [12, 12, FULL_COLORS.orange, '04']
+  ];
+  specs.forEach(([x, y, color, label]) => {
+    const card = saModuleCard(x, y, 130, 102, color); group.appendChild(card);
+    el('rect', { x: 20, y: 31, width: 48, height: 42, rx: 8, fill: FULL_COLORS.ink }, card);
+    el('path', { d: 'M31 43H56M31 53H50M31 63H58', stroke: color, 'stroke-width': 4, 'stroke-linecap': 'round' }, card);
+    text(label, { x: 106, y: 68, 'text-anchor': 'end', class: 'mg-num', 'font-size': 25, 'font-weight': 900, fill: color }, card);
+  });
+  el('path', { d: 'M-12-72H12M-77-21V12M77-21V12M-12 63H12', stroke: FULL_COLORS.ink, 'stroke-width': 5, 'stroke-dasharray': '4 7' }, group);
+  return group;
+}
+
+function saNetworkNodes() {
+  const group = el('g', { filter: 'url(#shadow)' });
+  const nodes = [[-135, -105, FULL_COLORS.blue], [135, -105, FULL_COLORS.green], [-135, 85, FULL_COLORS.purple], [135, 85, FULL_COLORS.orange]];
+  nodes.forEach(([x, y]) => el('path', { d: `M0-10L${x} ${y}`, fill: 'none', stroke: FULL_COLORS.ink, 'stroke-width': 5, 'stroke-dasharray': '9 8' }, group));
+  nodes.forEach(([x, y, color], index) => {
+    const node = el('g', { transform: `translate(${x} ${y})` }, group);
+    el('rect', { x: -48, y: -36, width: 96, height: 72, rx: 15, fill: '#fffdf7', stroke: FULL_COLORS.ink, 'stroke-width': 5 }, node);
+    el('circle', { cx: -24, cy: 0, r: 12, fill: color, stroke: FULL_COLORS.ink, 'stroke-width': 3 }, node);
+    el('path', { d: 'M0-12H28M0 0H21M0 12H30', stroke: FULL_COLORS.ink, 'stroke-width': 4, 'stroke-linecap': 'round' }, node);
+    text(`0${index + 1}`, { x: 0, y: 58, 'text-anchor': 'middle', class: 'mg-num', 'font-size': 16, 'font-weight': 900, fill: color }, node);
+  });
+  el('circle', { cx: 0, cy: -10, r: 62, fill: FULL_COLORS.ink, stroke: FULL_COLORS.green, 'stroke-width': 6 }, group);
+  el('circle', { cx: 0, cy: -10, r: 42, fill: 'url(#greenDots)', stroke: FULL_COLORS.paper, 'stroke-width': 2 }, group);
+  el('path', { d: 'M-19-10H19M0-29V9', stroke: FULL_COLORS.paper, 'stroke-width': 7, 'stroke-linecap': 'round' }, group);
+  return group;
+}
+
+function saCostBalance() {
+  const group = el('g', { filter: 'url(#shadow)' });
+  const receipt = saModuleCard(-155, -125, 128, 190, FULL_COLORS.green); group.appendChild(receipt);
+  text('¥', { x: 64, y: 87, 'text-anchor': 'middle', class: 'mg-num', 'font-size': 64, 'font-weight': 900, fill: FULL_COLORS.ink }, receipt);
+  el('path', { d: 'M24 112H103M24 132H88M24 152H97', stroke: FULL_COLORS.ink, 'stroke-width': 5, 'stroke-linecap': 'round', opacity: .55 }, receipt);
+  el('path', { d: 'M64-112V94M4 94H124M-42-69H170M-28-69L-72 12M156-69L200 12', fill: 'none', stroke: FULL_COLORS.ink, 'stroke-width': 7, 'stroke-linecap': 'round' }, group);
+  el('path', { d: 'M-118 12H-26Q-34 65-72 65T-118 12ZM154 12H246Q238 65 200 65T154 12Z', fill: '#fffdf7', stroke: FULL_COLORS.ink, 'stroke-width': 6 }, group);
+  el('path', { d: 'M-105 23H-39M167 23H233', stroke: FULL_COLORS.orange, 'stroke-width': 7, 'stroke-linecap': 'round' }, group);
+  el('circle', { cx: 64, cy: -112, r: 13, fill: FULL_COLORS.green, stroke: FULL_COLORS.ink, 'stroke-width': 4 }, group);
+  return group;
+}
+
+function saRetentionLoop() {
+  const group = el('g', { filter: 'url(#shadow)' });
+  const card = saModuleCard(-82, -70, 164, 140, FULL_COLORS.green); group.appendChild(card);
+  el('path', { d: 'M-45-25H45M-45 0H25M-45 25H37', stroke: FULL_COLORS.ink, 'stroke-width': 7, 'stroke-linecap': 'round' }, group);
+  el('path', { d: 'M-125-52A145 145 0 0 1 111-84L137-64M137-64L129-105M125 52A145 145 0 0 1-111 84L-137 64M-137 64L-129 105', fill: 'none', stroke: FULL_COLORS.ink, 'stroke-width': 13, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, group);
+  el('path', { d: 'M-125-52A145 145 0 0 1 111-84M125 52A145 145 0 0 1-111 84', fill: 'none', stroke: FULL_COLORS.green, 'stroke-width': 5, 'stroke-linecap': 'round' }, group);
+  el('circle', { cx: 70, cy: 48, r: 30, fill: FULL_COLORS.green, stroke: FULL_COLORS.ink, 'stroke-width': 5 }, group);
+  el('path', { d: 'M55 48L66 59L86 36', fill: 'none', stroke: FULL_COLORS.ink, 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, group);
+  return group;
+}
+
+function saWorkflowPipeline() {
+  const group = el('g', { filter: 'url(#shadow)' });
+  const colors = [FULL_COLORS.blue, FULL_COLORS.purple, FULL_COLORS.orange, FULL_COLORS.green];
+  for (let i = 0; i < 4; i++) {
+    const x = -160 + i * 82, y = -70 + i * 27;
+    const card = saModuleCard(x, y, 110, 126, colors[i]); group.appendChild(card);
+    el('path', { d: 'M22 40H85M22 60H72M22 80H87', stroke: FULL_COLORS.ink, 'stroke-width': 5, 'stroke-linecap': 'round', opacity: .72 }, card);
+    text(`0${i + 1}`, { x: 87, y: 108, 'text-anchor': 'end', class: 'mg-num', 'font-size': 20, 'font-weight': 900, fill: colors[i] }, card);
+    if (i < 3) el('path', { d: `M${x + 112} ${y + 61}H${x + 140}L${x + 130} ${y + 51}M${x + 140} ${y + 61}L${x + 130} ${y + 71}`, fill: 'none', stroke: FULL_COLORS.ink, 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, group);
+  }
+  return group;
+}
+
+function saAbstractModules() {
+  const group = el('g', { filter: 'url(#shadow)' });
+  [[-105, -80, FULL_COLORS.blue], [25, -80, FULL_COLORS.green], [-40, 25, FULL_COLORS.purple]].forEach(([x, y, color]) => {
+    const card = saModuleCard(x, y, 110, 100, color); group.appendChild(card);
+    el('circle', { cx: 55, cy: 58, r: 20, fill: FULL_COLORS.ink, stroke: color, 'stroke-width': 5 }, card);
+  });
+  return group;
+}
+
 function saShareholderFigure(index, color) {
   const group = saGenericFigure();
   el('path', { d: 'M-19-13H19L24-7V17L19 23H-19L-24 17V-7Z', fill: FULL_COLORS.ink, stroke: color, 'stroke-width': 3 }, group);

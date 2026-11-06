@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{项目名}} · Part{{N}}（{{T0}}–{{END}}s）</title>
+<style>
+/* ======================= 可替换皮肤：只改这里 ======================= */
+:root{
+  --background:#f4f0e6;--surface:#fffdf7;--surface-raised:#fff;
+  --ink:#102a22;--text:#102a22;--muted:#65736b;--accent:#c6ff3d;
+  --accent-2:#8ad8ce;--oppose:#ed6a5a;--actor:#102a22;--agent:#7768ae;
+  --warning:#e3aa3c;--ok:#3b9b72;--error:#d84c4c;--on-accent:#102a22;
+  --card-fill:rgba(255,253,247,.96);--card-stroke:rgba(16,42,34,.55);
+  --subtitle:#102a22;--subtitle-band:rgba(244,240,230,.94);
+  --sans:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --grid:false;--particles:false;--scanlines:false;--hud:false;
+}
+/* ===================== 布局与组件：非皮肤部分 ===================== */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:var(--background);overflow:hidden;font-family:var(--sans);color:var(--text)}
+#wrap{position:absolute;left:50%;top:calc(50% - 35px);transform:translate(-50%,-50%)}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:var(--background)}
+#bg,#world{position:absolute;left:0;top:0}#world text{font-family:inherit}.mono{font-family:var(--mono)}
+.hud-top{position:absolute;left:70px;right:70px;top:80px;display:none;justify-content:space-between;font-size:26px;letter-spacing:3px;color:var(--muted)}
+.hud-top .dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--accent);margin-right:14px;vertical-align:middle}
+#prog{position:absolute;left:70px;right:70px;top:140px;height:3px;background:var(--card-stroke);display:none}
+#prog i{display:block;height:100%;width:0;background:var(--accent)}
+.corner{position:absolute;width:70px;height:70px;border:3px solid var(--accent);display:none}
+.c1{left:36px;top:36px;border-right:0;border-bottom:0}.c2{right:36px;top:36px;border-left:0;border-bottom:0}
+.c3{left:36px;bottom:36px;border-right:0;border-top:0}.c4{right:36px;bottom:36px;border-left:0;border-top:0}
+body.hud .hud-top,body.hud #prog,body.hud .corner{display:flex}body.hud #prog,body.hud .corner{display:block}
+#subBand{position:absolute;left:0;right:0;top:1360px;height:560px;pointer-events:none;background:var(--subtitle-band)}
+#sub{position:absolute;top:1470px;left:50px;right:50px;text-align:center;font-size:60px;font-weight:800;line-height:1.3;color:var(--subtitle);text-shadow:0 2px 12px var(--background)}
+#sub b{color:var(--accent-strong,var(--ink))}.footer{position:absolute;bottom:100px;width:100%;text-align:center;font-size:22px;letter-spacing:6px;color:var(--muted)}
+.scan{position:absolute;inset:0;pointer-events:none;display:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 2px,transparent 2px 4px)}
+body.scanlines .scan{display:block}#vo{display:none}
+#ctrl{position:fixed;left:0;right:0;bottom:0;height:60px;display:flex;align-items:center;gap:14px;padding:0 20px;background:var(--surface);font-size:14px;color:var(--text);border-top:1px solid var(--card-stroke)}
+#ctrl button{background:var(--accent);color:var(--on-accent);border:1px solid var(--card-stroke);padding:6px 14px;border-radius:4px;cursor:pointer}#ctrl input{flex:1}
+body.export #wrap{left:0;top:0;transform:none}body.export #ctrl{display:none}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <canvas id="bg" width="1080" height="1920"></canvas>
+  <svg id="world" width="1080" height="1920" viewBox="0 0 1080 1920">
+    <defs>
+      <linearGradient id="gGround" gradientUnits="userSpaceOnUse" x1="90" y1="0" x2="990" y2="0"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent-2)"/></linearGradient>
+      <linearGradient id="gChip" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--surface-raised)"/><stop offset="1" stop-color="var(--surface)"/></linearGradient>
+      <radialGradient id="gHalo"><stop offset="0" stop-color="var(--accent)" stop-opacity=".3"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></radialGradient>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <g id="cam"></g>
+  </svg>
+  <div class="corner c1"></div><div class="corner c2"></div><div class="corner c3"></div><div class="corner c4"></div>
+  <div class="hud-top mono"><div><span class="dot"></span>{{项目代号}}</div><div id="tc">00:00.00</div></div>
+  <div id="prog"><i></i></div><div id="subBand"></div><div id="sub"></div>
+  <div class="footer mono">{{底部标识}}</div><div class="scan"></div>
+</div></div>
+<audio id="vo" preload="auto"></audio>
+<div id="ctrl"><button id="play">▶ 播放</button><button id="re">⟲ 重播</button><input id="scrub" type="range" step="0.01"><span id="tlabel" class="mono"></span></div>
+<script src="engine.js"></script>
+<script>
+/* 皮肤从 CSS token 读取；换肤不得改下面的叙事代码。 */
+const cssToken = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const boolToken = name => cssToken(name) === 'true';
+const STAGE_THEME = {
+  background:cssToken('--background'),surface:cssToken('--surface'),surfaceRaised:cssToken('--surface-raised'),
+  ink:cssToken('--ink'),text:cssToken('--text'),muted:cssToken('--muted'),accent:cssToken('--accent'),
+  accent2:cssToken('--accent-2'),oppose:cssToken('--oppose'),actor:cssToken('--actor'),agent:cssToken('--agent'),
+  warning:cssToken('--warning'),ok:cssToken('--ok'),error:cssToken('--error'),onAccent:cssToken('--on-accent'),
+  cardFill:cssToken('--card-fill'),cardStroke:cssToken('--card-stroke'),subtitle:cssToken('--subtitle'),
+  subtitleBand:cssToken('--subtitle-band'),sans:cssToken('--sans'),mono:cssToken('--mono'),
+  grid:boolToken('--grid'),particles:boolToken('--particles'),scanlines:boolToken('--scanlines'),hud:boolToken('--hud')
+};
+if(STAGE_THEME.hud)document.body.classList.add('hud');
+if(STAGE_THEME.scanlines)document.body.classList.add('scanlines');
+initStage();
+const T0 = 0, END = 10, TOTAL = 255.5; // 全片绝对秒数；各段 TOTAL 一致
+const HK = [[0,[540,800,0,0,0,0]],[.6,[540,800,180,180,1,1.1]]];
+const hub = makeHub(T0,END,HK,'主体');
+// 承接：上一镜的【稳定对象】→【动作】→ 本镜的【对象】。
+P('示例标签',540,560,220,60,1,9.5,{stroke:MotionEngine.CY});
+const hero = mkFig(L.figs,STAGE_THEME.actor,5);
+figAct(hero,T0,END,{x:[[2,200],[4,420,lin]],y:1200,s:1.6,o:io(2,9.8),walk:[[2,4]],aR:[[4.2,8],[4.6,130]]});
+// 有 SRT 时由 scripts/srt2subs.js 生成；无 SRT 不伪造精确对轴。
+const SUBS = [[1,4,'这是一条<b>示例字幕</b>']];
+const CAM = [[0,[820,1.1]],[1.2,[820,1]]];
+// 新段首帧必须复原上一段末帧；可用 snapshotState 对比。
+const audio = document.getElementById('vo'); // 设置本期真实音频 src 后自动成为主时钟
+boot({T0,END,TOTAL,SUBS,CAM,theme:STAGE_THEME,audio:audio.src?audio:null,audioOffset:T0});
+</script>
+</body>
+</html>

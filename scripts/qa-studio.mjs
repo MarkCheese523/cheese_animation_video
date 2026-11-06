@@ -170,7 +170,8 @@ try {
   await evaluate(`document.querySelector('#confirmMotion').click()`);
   await waitExpression(`!document.querySelector('#elements').hidden && document.querySelectorAll('.candidate').length >= 9 && [...document.querySelectorAll('.element-slot')].every(slot => slot.querySelector('.candidates'))`, 30000);
   if (await evaluate(`[...document.querySelectorAll('.element-slot')].some(slot => slot.querySelectorAll('.candidate').length > 6)`)) throw new Error('单个元素槽的候选超过 6 个');
-  if (!await evaluate(`document.querySelector('[data-slot="G0"] svg[data-semantic="generic"][data-semantic-ready="true"]')`)) throw new Error('G0 未加载原版通用人物语义资产');
+  if (!await evaluate(`document.querySelector('[data-slot="G0"] svg[data-semantic="generic"][data-semantic-role="generic"][data-semantic-ready="true"]')`)) throw new Error('G0 未加载原版通用人物语义资产');
+  if (!await evaluate(`document.querySelector('[data-slot="N1"] svg[data-semantic-role="capability"][data-semantic-ready="true"]')`)) throw new Error('非人物通用语义仍错误回落到人物母版');
   if (!await evaluate(`document.querySelector('[data-slot="N2"] .candidate img') && !document.querySelector('[data-slot="N2"] .slot-query').disabled`)) throw new Error('semanticOnly 普通元素仍跳过联网检索或禁用了检索词');
   await evaluate(`(() => {
     const slot = document.querySelector('[data-slot="N1"]');

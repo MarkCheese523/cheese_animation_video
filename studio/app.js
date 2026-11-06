@@ -66,6 +66,7 @@ function updateGateUI() {
   $('#sampleGate').textContent = `代表样片 · ${samples ? '已确认' : state.sampleResult ? '待验收' : '待制作'}`;
   $('#sampleGate').classList.toggle('confirmed-tag', samples);
   $('#filmProgress').textContent = state.filmResult ? '完整网页预览已回写；最终导出仍需另行明确授权' : state.filmJobId ? '等待 Agent 回写全片，不会自动生成或导出' : '全片任务将携带两段样片结果与确认状态';
+  scheduleDraftSave();
 }
 function invalidateProduction() {
   state.confirmations.samples = false;
@@ -119,6 +120,15 @@ function assetVisual(candidate, concept) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 360 360'); svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', `${concept}通用语义资产`); svg.dataset.semantic = candidate.visualKind;
+    const slotFallback = state.slots.find(slot => slot.id === candidate.slot)?.fallback;
+    const fallback = typeof candidate.fallback === 'string' ? candidate.fallback : slotFallback;
+    const semanticRoles = {
+      'lucide:blocks': 'capability', 'lucide:network': 'network',
+      'lucide:receipt-text': 'cost', 'lucide:repeat-2': 'retention',
+      'lucide:file-chart-column': 'workflow'
+    };
+    svg.dataset.semanticRole = candidate.visualKind !== 'generic' || candidate.id === 'G0' || candidate.id === 'G0-A' || fallback === 'lucide:user-round'
+      ? candidate.visualKind : (semanticRoles[fallback] || 'abstract');
     mountSemanticAsset(svg); return svg;
   }
   if (candidate.abstractOnly) {
@@ -743,21 +753,65 @@ $('#confirmSamples').addEventListener('click', () => {
 $('#copyMasterPrompt').addEventListener('click', () => copyPrompt($('#masterPrompt'), $('#copyMasterPrompt')));
 $('#copySamplePrompt').addEventListener('click', () => copyPrompt($('#samplePrompt'), $('#copySamplePrompt')));
 $('#copyFilmPrompt').addEventListener('click', () => copyPrompt($('#filmPrompt'), $('#copyFilmPrompt')));
+let draftSaveTimer = 0;
+let serverRecovery = null;
 function draftSnapshot() {
   return {
     ...state, version: 2, script: $('#scriptInput').value, notes: $('#notesInput').value,
     aspect: $('#aspectInput').value, beats: beatInput(), savedAt: new Date().toISOString()
   };
 }
-function refreshDraftNotice() {
+function recoveryDraft(result) {
+  if (result.draft) return result.draft;
+  const { job, analysis } = result;
+  return {
+    version: 2, mode: job.mode, style: job.style, profile: job.profile, fidelity: job.fidelity, intensity: job.intensity,
+    selections: {}, slots: analysis.assets, masters: {}, currentStep: 'motion', referenceSheet: '', jobId: job.id, analysis,
+    masterJobId: '', masterResult: null, sampleJobId: '', filmJobId: '', sampleResult: null, filmResult: null,
+    activeSample: 'opening', viewedSamples: { opening: false, mechanism: false },
+    confirmations: { storyboard: false, references: false, masters: false, samples: false },
+    script: job.script, notes: job.notes || '', aspect: job.aspect, beats: analysis.beats, savedAt: analysis.analyzedAt || job.createdAt
+  };
+}
+function persistDraft(manual = false) {
+  if (!state.jobId || !state.analysis) return;
+  clearTimeout(draftSaveTimer);
+  const draft = draftSnapshot();
+  localStorage.setItem('motion-layer-draft', JSON.stringify(draft));
+  $('#saveStatus').textContent = manual
+    ? '草稿已保存在此浏览器和服务端任务中，可在输入页点击“继续上次草稿”恢复。'
+    : `已自动保存 ${new Date().toLocaleTimeString('zh-CN')} · 换端口也可恢复`;
+  fetch(`/api/agent-jobs/${state.jobId}/draft`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(draft)
+  }).then(async response => {
+    if (!response.ok) throw new Error('服务端草稿保存失败');
+    serverRecovery = draft;
+  }).catch(error => {
+    if (manual) $('#saveStatus').textContent = `${error.message}；已保留浏览器草稿`;
+  });
+  refreshDraftNotice();
+}
+function scheduleDraftSave() {
+  clearTimeout(draftSaveTimer);
+  if (!state.jobId || !state.analysis) return;
+  draftSaveTimer = setTimeout(() => persistDraft(false), 400);
+}
+async function refreshDraftNotice() {
   const notice = $('#draftNotice');
   try {
-    const draft = JSON.parse(localStorage.getItem('motion-layer-draft') || 'null');
+    let draft = JSON.parse(localStorage.getItem('motion-layer-draft') || 'null');
+    let fromServer = false;
+    if (!draft) {
+      const response = await fetch('/api/agent-jobs/latest', { cache: 'no-store' });
+      const result = await response.json();
+      serverRecovery = result.result ? recoveryDraft(result.result) : null;
+      draft = serverRecovery;
+      fromServer = Boolean(draft);
+    }
     if (!draft) { notice.hidden = true; return; }
     const savedAt = draft.savedAt ? new Date(draft.savedAt) : null;
-    $('#draftNoticeMeta').textContent = savedAt && !Number.isNaN(savedAt.getTime())
-      ? `保存于 ${savedAt.toLocaleString('zh-CN')} · 恢复分镜、确认与制作结果`
-      : '可继续上次制作进度';
+    const time = savedAt && !Number.isNaN(savedAt.getTime()) ? `保存于 ${savedAt.toLocaleString('zh-CN')}` : '可继续上次制作进度';
+    $('#draftNoticeMeta').textContent = `${time} · ${fromServer ? '从服务端任务跨端口恢复' : '恢复分镜、确认与制作结果'}`;
     $('#loadDraft').disabled = false; notice.hidden = false;
   } catch {
     $('#draftNoticeMeta').textContent = '草稿内容无法读取，请重新开始或清除站点数据';
@@ -775,7 +829,7 @@ function renderRestoredReferences() {
     const selected = state.selections[slot.id];
     const container = document.createElement('article'); container.className = 'element-slot'; container.dataset.slot = slot.id;
     const localOnly = researchRoute(slot) === 'semantic';
-    container.innerHTML = `<div class="slot-head"><span class="asset-id">${escapeHtml(slot.code)}</span><div class="slot-title"><b>${escapeHtml(slot.concept)} · 已恢复参考</b><p>保留草稿中的来源、授权、拟保留特征与母版选择。</p></div><button class="slot-research" type="button">${localOnly ? '刷新表达方向' : '重新打开候选 ↗'}</button></div><div class="slot-semantics"><label>预期动作<input class="slot-action-input" value="${escapeHtml(slot.action)}"></label><label>联网检索词<input class="slot-query" value="${escapeHtml(slot.query)}" ${localOnly ? 'disabled' : ''}></label></div>`;
+    container.innerHTML = `<div class="slot-head"><span class="asset-id">${escapeHtml(slot.code)}</span><div class="slot-title"><b>${escapeHtml(slot.concept)} · ${selected ? '已恢复参考' : '参考待补齐'}</b><p>${selected ? '保留草稿中的来源、授权、拟保留特征与母版选择。' : '草稿中这项选择未完整保存，正在自动补齐候选；其余已选项保持不变。'}</p></div><button class="slot-research" type="button">${localOnly ? '刷新表达方向' : '重新打开候选 ↗'}</button></div><div class="slot-semantics"><label>预期动作<input class="slot-action-input" value="${escapeHtml(slot.action)}"></label><label>联网检索词<input class="slot-query" value="${escapeHtml(slot.query)}" ${localOnly ? 'disabled' : ''}></label></div>`;
     const grid = document.createElement('div'); grid.className = 'candidates';
     const button = container.querySelector('.slot-research');
     container.querySelector('.slot-action-input').addEventListener('input', event => { slot.action = event.target.value; invalidateConfirmations('references'); });
@@ -795,6 +849,9 @@ function renderRestoredReferences() {
       const sourceUrl = selected.sourceUrl || selected.svg || selected.image;
       if (sourceUrl) { const source = document.createElement('a'); source.href = sourceUrl; source.target = '_blank'; source.rel = 'noreferrer'; source.textContent = '查看真实资产与来源 ↗'; choice.appendChild(source); }
       grid.appendChild(choice);
+    } else {
+      grid.className = 'slot-status'; grid.textContent = '正在补齐这一项的候选，其他已选参考不受影响…';
+      queueMicrotask(() => loadCandidates(slot, grid, button));
     }
     container.appendChild(grid); return container;
   });
@@ -820,7 +877,7 @@ async function restorePendingProduction(stage) {
 async function loadDraft() {
   const button = $('#loadDraft'); button.disabled = true;
   try {
-    const draft = JSON.parse(localStorage.getItem('motion-layer-draft') || 'null');
+    const draft = JSON.parse(localStorage.getItem('motion-layer-draft') || 'null') || serverRecovery;
     if (!draft?.analysis || !draft.jobId || !Array.isArray(draft.slots) || !Array.isArray(draft.beats)) throw new Error('草稿缺少分镜或素材数据');
     state.agentPoll += 1; state.masterPoll += 1; state.productionPoll += 1;
     ['mode', 'style', 'profile', 'fidelity', 'intensity', 'selections', 'slots', 'masters', 'referenceSheet', 'jobId', 'analysis', 'masterJobId', 'masterResult', 'sampleJobId', 'filmJobId', 'sampleResult', 'filmResult', 'activeSample'].forEach(key => {
@@ -885,14 +942,11 @@ async function loadDraft() {
     button.disabled = false;
   }
 }
-$('#saveDraft').addEventListener('click', () => {
-  localStorage.setItem('motion-layer-draft', JSON.stringify(draftSnapshot()));
-  $('#saveStatus').textContent = '草稿已保存在此浏览器，可在输入页点击“继续上次草稿”恢复。';
-  refreshDraftNotice();
-});
+$('#saveDraft').addEventListener('click', () => persistDraft(true));
 $('#loadDraft').addEventListener('click', loadDraft);
+window.addEventListener('pagehide', () => persistDraft(false));
 ['#scriptInput', '#notesInput', '#aspectInput'].forEach(selector => {
-  $(selector).addEventListener('input', () => { resetAgentAnalysis(); markGeneratedStale(); });
+  $(selector).addEventListener('input', () => { resetAgentAnalysis(); markGeneratedStale(); scheduleDraftSave(); });
 });
 $('#attachmentInput').addEventListener('change', () => {
   resetAgentAnalysis();

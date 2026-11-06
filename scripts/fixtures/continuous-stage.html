@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Continuous stage fixture</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f4f0e6;font-family:"PingFang SC",sans-serif;color:#102a22}#wrap{position:relative;width:1080px;height:1920px}#stage{position:relative;width:1080px;height:1920px;background:#f4f0e6}#bg,#world{position:absolute;inset:0}#sub{position:absolute;top:1470px;left:80px;right:80px;text-align:center;font-size:54px;font-weight:800}#sub b{color:#35770b}#prog{position:absolute;left:60px;right:60px;top:80px;height:4px;background:#d6d4ca}#prog i{display:block;height:100%;background:#8abd34;width:0}#tc{position:absolute;right:60px;top:110px;font:24px monospace}#ctrl{position:fixed;bottom:0;left:0;right:0;height:60px;display:flex;gap:12px;padding:12px;background:#fff}#scrub{flex:1}body.export #ctrl{display:none}
+</style></head><body><div id="wrap"><div id="stage"><canvas id="bg" width="1080" height="1920"></canvas><svg id="world" width="1080" height="1920" viewBox="0 0 1080 1920"><defs><linearGradient id="gChip"><stop stop-color="#fff"/><stop offset="1" stop-color="#eaf2dc"/></linearGradient><radialGradient id="gHalo"><stop stop-color="#c6ff3d" stop-opacity=".5"/><stop offset="1" stop-color="#c6ff3d" stop-opacity="0"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g id="cam"></g></svg><div id="prog"><i></i></div><div id="tc"></div><div id="sub"></div></div></div><div id="ctrl"><button id="play">播放</button><button id="re">重播</button><input id="scrub" type="range" step=".01"><span id="tlabel"></span></div>
+<script src="../../templates/engine.js"></script><script>
+initStage();const T0=0,END=8,TOTAL=8;
+const HK=[[0,[540,650,180,180,1,1]],[3,[540,700,180,180,1,1]],[5,[540,760,360,150,1,.8]],[8,[540,760,360,150,1,.8]]];
+const hub=makeHub(0,8,HK,'主体');hub.g.dataset.testid='continuous-subject';
+const container=rect(L.main,180,180,{fill:'#fffdf7',stroke:'#102a22'});
+morphRect(container,2.6,5,[[2.6,[540,650,180,180,90,0]],[3,[540,650,180,180,90,1]],[5,[540,760,360,150,24,0]]]);
+const card=G(L.main);rect(card,160,100,{fill:'#c6ff3d',stroke:'#102a22'});T(card,'任务',0,10,30);
+hop(card,2.8,5,[[2.8,5,[220,1050],[540,1040],[360,880]]],{o:io(2.8,5.6,.2)});
+const hero=mkFig(L.figs,'#102a22',5);const HERO={x:180,y:1240,s:1.8,face:1,aR:[[0,8],[2,70],[8,70]],o:1};figAct(hero,0,8,HERO);
+const held=G(L.over);rect(held,120,70,{fill:'#fff',stroke:'#102a22'});T(held,'交接',0,8,24);upd(0,8,t=>{const h=figHand(HERO,t);held.setAttribute('transform',`translate(${h[0]} ${h[1]})`)});
+const dots=[0,1,2,3].map(i=>({el:G(L.main),from:[180+i*80,900]}));dots.forEach(d=>mk('circle',{r:18,fill:'#8ad8ce'},d.el));gather(dots,5.2,7.2,[540,760],{stagger:.08});
+const SUBS=[[0,2.8,'同一个主体持续在场'],[2.8,5.2,'容器与任务沿路径变形交接'],[5.2,8,'分散结果汇回同一主体']];const CAM=[[0,[820,1.08]],[2,[820,1]],[8,[820,1]]];boot({T0,END,TOTAL,SUBS,CAM});
+</script></body></html>

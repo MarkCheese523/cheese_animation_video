@@ -36,9 +36,15 @@ function mountSemanticAsset(svg) {
 
   const stage = el('g');
   currentRoot = stage;
-  const kind = svg.dataset.semantic;
+  const kind = svg.dataset.semanticRole || svg.dataset.semantic;
   const builders = {
     generic: () => saGenericFigure(),
+    capability: () => saCapabilityModules(),
+    network: () => saNetworkNodes(),
+    cost: () => saCostBalance(),
+    retention: () => saRetentionLoop(),
+    workflow: () => saWorkflowPipeline(),
+    abstract: () => saAbstractModules(),
     shareholder: () => saShareholderFigure(1, FULL_COLORS.green),
     company: () => saCompanyBuilding(),
     institution: () => saInstitutionBuilding('INST', '机构建筑', FULL_COLORS.T),
@@ -51,9 +57,10 @@ function mountSemanticAsset(svg) {
   if (!builders[kind]) throw new Error(`未知语义资产：${kind}`);
   const asset = builders[kind]();
   const defaults = {
-    generic: [.9, 190], shareholder: [.8, 180], company: [.55, 185],
-    institution: [.48, 185], fund: [.43, 172], trust: [.43, 172],
-    voting: [.58, 165], chair: [.75, 175], vote: [.95, 170],
+    generic: [.9, 190], capability: [.85, 180], network: [.82, 180],
+    cost: [.68, 180], retention: [.8, 180], workflow: [.8, 180], abstract: [.8, 180],
+    shareholder: [.8, 180], company: [.55, 185], institution: [.48, 185],
+    fund: [.43, 172], trust: [.43, 172], voting: [.58, 165], chair: [.75, 175], vote: [.95, 170],
   };
   const [defaultScale, defaultY] = defaults[kind];
   const scale = Number(svg.dataset.scale || defaultScale);

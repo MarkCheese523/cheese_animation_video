@@ -1,7 +1,7 @@
 export function makeAgentAnalysis(jobId, { product = false, brands = [] } = {}) {
   const assets = [
     { id: 'G0', code: 'G0', concept: '通用人物', query: '', action: '中立站立、递交凭证', researchRoute: 'semantic', semanticOnly: true, visualKind: 'generic', semanticName: '无脸点阵中立母版＋动作变体', rights: '通用语义资产：无外部肖像参考，不指向特定真人。' },
-    { id: 'N1', code: 'N1', concept: '凭证', query: 'certificate document', action: '绘制、展开、确权', fallback: 'lucide:file-badge' },
+    { id: 'N1', code: 'N1', concept: '凭证', query: 'certificate document', action: '绘制、展开、确权', fallback: 'lucide:blocks', semanticOnly: true, visualKind: 'generic', semanticName: '能力模块组合', rights: '通用模块语义资产，不使用人物。' },
     { id: 'N2', code: 'N2', concept: '拆分', query: 'split', action: '一个变多个', researchRoute: 'icon', fallback: 'lucide:split', semanticOnly: true, semanticName: '路径拆分', rights: '公开图标或通用语义资产；参考与母版待确认。' },
     { id: 'N3', code: 'N3', concept: '转让', query: 'transfer exchange arrows', action: '沿路径交接', fallback: 'lucide:arrow-left-right' },
     { id: 'N4', code: 'N4', concept: '失效', query: 'expired clock alert', action: '退去、打叉', fallback: 'lucide:timer-off' },
