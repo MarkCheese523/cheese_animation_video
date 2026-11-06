@@ -17,7 +17,7 @@ export function makeAgentAnalysis(jobId, { product = false, brands = [] } = {}) 
   }));
   return {
     jobId,
-    summary: 'Agent 将凭证的生命周期拆成建立、拆分、交接、失效与同步归位，并自动纳入本期真实品牌。',
+    summary: 'AI 把凭证的一生拆成建立、拆分、交接、失效和归位五个画面，并自动加入本期真实品牌。',
     beats: [
       { id: 'gather', label: '凭证建立', duration: 3, action: 'component-gather', note: '人物与凭证聚合，建立权利载体', narration: '先建立可转让的凭证。', assetIds: ['G0', 'N1'] },
       { id: 'trigger', label: '拆分确权', duration: 4, action: 'direct-press', note: '按压后凭证拆成独立权利', narration: '凭证拆分后可以转让。', assetIds: ['N1', 'N2'] },

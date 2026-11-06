@@ -118,6 +118,6 @@ async function searchBrandCandidates(slot) {
 function fallbackCandidates(slot) {
   return [slot.fallback, 'lucide:shapes', 'lucide:sparkles'].map((id, index) => ({
     id: index === 0 ? id : `${id}-${index}`, name: index === 0 ? (FALLBACK_LABELS[id] || slot.concept) : '抽象辅助元素',
-    style: '本地回退', author: '通用几何', license: '待制作母版', fallback: true, slot: slot.id
+    style: '本地备选', author: '通用几何', license: '待 AI 重绘', fallback: true, slot: slot.id
   }));
 }
