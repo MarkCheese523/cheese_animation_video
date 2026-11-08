@@ -46,28 +46,37 @@ export function parseSrt(raw) {
 /**
  * 把拍次与字幕句子对齐，得到每拍的绝对起止时间。
  * 优先用 SRT 句子时间（精确）；句数与拍数不一致时按比例分配并标记为估算。
+ *
+ * ★ 分镜表自带起止时优先用分镜表的：
+ *   一拍常常盖住 2–5 句字幕（SRT 句数 ≠ 拍数），这时「按句对齐」走不通，
+ *   只能按 duration 累加 —— 而累加出来的起点与真实时间差一个常数偏移，
+ *   接触表的关键帧就会整体错位。分镜表（storyboard.json / analysis.json 的
+ *   beats[].start / beats[].end）是表A 的权威起止，有它就用它。
  */
 export function buildTimeline(beats, sentences) {
   const rows = [];
   const exact = Array.isArray(sentences) && sentences.length === beats.length;
   beats.forEach((beat, index) => {
     const sentence = exact ? sentences[index] : null;
+    const declared = Number.isFinite(beat?.start) && Number.isFinite(beat?.end)
+      ? { start: beat.start, end: beat.end } : null;
     const duration = Number(beat.duration) || (sentence ? sentence.end - sentence.start : 0);
     rows.push({
       ...beat,                        // 保留 focus / verb / relation / carry 等全部原始字段
       id: beat.id,
       label: beat.label,
       narration: beat.narration || (sentence ? sentence.text : ''),
-      start: sentence ? sentence.start : null,
-      end: sentence ? sentence.end : null,
+      start: declared ? declared.start : (sentence ? sentence.start : null),
+      end: declared ? declared.end : (sentence ? sentence.end : null),
       duration,
-      estimated: !sentence
+      estimated: !declared && !sentence
     });
   });
-  if (!exact) {
+  if (!exact && !rows.every(row => row.start != null && row.end != null)) {
     // 回退：按 duration 顺序累加，标注为估算（关键帧时间只用于定位，不代表真实对轴）
     let cursor = rows[0] && rows[0].start != null ? rows[0].start : 0.5;
     for (const row of rows) {
+      if (row.start != null && row.end != null) { cursor = row.end; continue; }
       row.start = Number(cursor.toFixed(2));
       row.end = Number((cursor + row.duration).toFixed(2));
       row.estimated = true;

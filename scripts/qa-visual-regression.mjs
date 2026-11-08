@@ -17,7 +17,6 @@ const option = (name, fallback = '') => {
   const index = args.indexOf(`--${name}`);
   return index >= 0 ? args[index + 1] : fallback;
 };
-const flags = new Set(['--update']);
 const positional = args.filter((arg, index) => {
   if (arg.startsWith('--')) return false;
   const previous = args[index - 1];
@@ -25,7 +24,11 @@ const positional = args.filter((arg, index) => {
 });
 const url = positional[0];
 const baselineDir = option('baseline');
-const update = flags.has('--update') || args.includes('--update');
+/* --update 只在命令行里真的出现时才算。
+   （原来的写法 `flags.has('--update')` 恒为真 —— flags 是「取值型开关」的集合，
+     于是每次跑都会自动刷新基线，「Agent 不得自行改基线」这条闸门形同虚设，
+     视觉回归退化成「永远一致」。） */
+const update = args.includes('--update');
 
 if (!url || !baselineDir) {
   throw new Error('用法：node scripts/qa-visual-regression.mjs <page-url> --baseline <dir> [--update] [--times 0.8,3.6]');
