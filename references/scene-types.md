@@ -1,6 +1,6 @@
 # 场景类型速查
 
-> 这里描述的是**设计台分镜预览器**（`assets/template/*`：`player.js` + `scenes.js` + `motion-sequence.js` + `motion-presets.js`）里的场景类型，**不是成片页型**。
+> 这里描述的是**设计台分镜预览器**（`assets/template/*`：`assets/template/player.js` + `assets/template/scenes.js` + `assets/template/motion-sequence.js` + `assets/template/motion-presets.js`）里的场景类型，**不是成片页型**。
 > 成片一律走 `templates/engine.js` + `templates/kit/`（MotionEngine 与母版工具），那条链路的页面写法不在本表内。
 > 本表只回答一件事：`project.json` 的 `scenes[].type` 能填什么、填了以后画面上会出现什么。
 
@@ -49,12 +49,12 @@ SCENE_TYPES: counter, flow, compare, reveal, end, motionSequence
 
 **注册表在哪**：渲染器注册表叫 `SCENE_BUILDERS`，定义在 `assets/template/scenes.js`（`counter` / `flow` / `compare` / `reveal` / `end`），
 `motionSequence` 追加注册在 `assets/template/motion-sequence.js:2`。
-`player.js` 里**没有** `builders` 这个标识符，它只做 `SCENE_BUILDERS[scene.type]`（`assets/template/player.js:158`）；
+`assets/template/player.js` 里**没有** `builders` 这个标识符，它只做 `SCENE_BUILDERS[scene.type]`（`assets/template/player.js:158`）；
 type 没注册会直接抛错「未注册的场景类型」（`:159`），画面全白。
 
 **校验器认的类型**：`scripts/validate_project.py` 的 `BUILTINS = {counter, flow, compare, reveal, end, motionSequence}`。
 
-**渲染时序**：每个 builder 返回一个纯函数 `render(t)`，`t` 是**本场景内的秒数**（`player.js:86` 用 `global - scene.start` 换算），
+**渲染时序**：每个 builder 返回一个纯函数 `render(t)`，`t` 是**本场景内的秒数**（`assets/template/player.js:86` 用 `global - scene.start` 换算），
 所以 `timing` 的毫秒值要除以 1000 才是场景内秒数。
 
 ---
@@ -378,6 +378,6 @@ type 没注册会直接抛错「未注册的场景类型」（`:159`），画面
 
 早期有一份「页型速查」文档化过 11 个页型（`sign`、`typewriter`、`redefine`、`logo`、`cards`、`method`、`stack`、`filter`、`persona`、`rule`、`end`），
 那是另一套「配置 + 样式」工程（已不在本仓库）。本仓库的预览器**从未注册过**它们：
-在 `project.json` 里写这些 type，`player.js:159` 会直接抛「未注册的场景类型」。
+在 `project.json` 里写这些 type，`assets/template/player.js:159` 会直接抛「未注册的场景类型」。
 旧文档里的 `end`（props 为 `note` / `slogan` / `badge` / `foot`）也不是现在这一版 `end`（props 为 `title` / `subtitle` / `note`）。
 `studio/demo/dark-narrative-sequence.js` 里的 `darkNarrativeSequence` 是设计台 demo 用的另一套模板，不在 `assets/template/player.html` 的加载链上。
