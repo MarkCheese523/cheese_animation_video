@@ -20,6 +20,82 @@ const DEMO_PROFILE = {
   confirmation: 'pending'
 };
 
+/* ========================================================================
+   闸门状态机（rule: C01 闸门回退必须永远可用）
+   每个闸门有 locked / pending / approved 三态；退回（返工）动作**永远可用**，
+   只要这一环还有产物可退。流程不能变成单向门 —— 否则用户说「还要改」时无处可去。
+   ======================================================================== */
+const GATES = [
+  { id: 'storyboard', step: 'motion', label: '分镜' },
+  { id: 'references', step: 'elements', label: '素材参考' },
+  { id: 'masters', step: 'redraw', label: '风格化重绘' },
+  { id: 'samples', step: 'preview', label: '两段样片' },
+  { id: 'film', step: 'film', label: '全片预览' }
+];
+function gateStatus(id) {
+  if (id === 'film') {
+    if (state.filmResult) return 'approved';
+    return state.filmJobId ? 'pending' : 'locked';
+  }
+  if (id === 'samples') {
+    if (state.confirmations.samples) return 'approved';
+    return state.sampleJobId ? 'pending' : 'locked';
+  }
+  if (id === 'masters') {
+    if (state.confirmations.masters) return 'approved';
+    return state.masterJobId ? 'pending' : 'locked';
+  }
+  if (id === 'references') {
+    if (state.confirmations.references) return 'approved';
+    return state.slots.length ? 'pending' : 'locked';
+  }
+  if (state.confirmations.storyboard) return 'approved';
+  return state.analysis ? 'pending' : 'locked';
+}
+/** 这一环是否还有「可返工的东西」—— 有就必须允许退回。 */
+function canReject(id) {
+  if (id === 'storyboard') return Boolean(state.analysis);
+  if (id === 'references') return state.slots.length > 0;
+  if (id === 'masters') return Boolean(state.masterJobId || state.masterResult);
+  if (id === 'samples') return Boolean(state.sampleJobId || state.sampleResult);
+  if (id === 'film') return Boolean(state.filmJobId || state.filmResult);
+  return false;
+}
+function rejectGate(id) {
+  if (!canReject(id)) return;
+  if (id === 'storyboard') { resetAgentAnalysis(); }
+  else if (id === 'references') { invalidateConfirmations('references'); }
+  else if (id === 'masters') { state.confirmations.masters = false; invalidateMasters(); invalidateProduction(); }
+  else if (id === 'samples') { invalidateProduction(); }
+  else if (id === 'film') {
+    state.filmJobId = ''; state.filmResult = null; state.productionPoll += 1;
+    $('#filmHandoff').hidden = true; $('#filmWorkspace').hidden = true;
+    $('#filmFrame').removeAttribute('src'); $('#filmPrompt').value = '';
+  }
+  updateGateUI();
+  const step = (GATES.find(gate => gate.id === id) || {}).step;
+  if (step && stepPermissions()[step]) showStep(step);
+}
+/* 测试钩子（rule: C01）：把闸门状态机暴露出来，让 scripts/test-studio-gates.mjs
+   能直接断言「返工永远可用」「全片不锁死」—— 这些是本期真实卡死过的地方，
+   必须在每次改动后仍然可验证，而不是靠人肉点一遍。 */
+window.__motionGateTest = {
+  GATES, gateStatus, canReject, rejectGate, updateGateUI, state,
+  /* rule: E28 拍数由语义段落数决定，不是固定值
+     用 getter 延迟取值：下面几个是后面才声明的 const/函数，提前取值会踩 TDZ。 */
+  get renderBeatEditor() { return renderBeatEditor; },
+  get beatActions() { return beatActions; },
+  get representativeSamples() { return representativeSamples; },
+  snapshot() {
+    return {
+      confirmations: { ...state.confirmations },
+      sampleJobId: state.sampleJobId, filmJobId: state.filmJobId,
+      sampleResult: Boolean(state.sampleResult), filmResult: Boolean(state.filmResult),
+      analysis: Boolean(state.analysis), slots: state.slots.length,
+      masterJobId: state.masterJobId, masterResult: Boolean(state.masterResult)
+    };
+  }
+};
 function allReferencesSelected() {
   return state.slots.length > 0 && state.slots.every(slot => state.selections[slot.id] && !state.selections[slot.id].unavailable);
 }
@@ -57,12 +133,28 @@ function updateGateUI() {
   $('#confirmReferences').disabled = !storyboard || !allReferencesSelected() || !state.referenceSheet;
   const agentMastersReady = Boolean(state.masterResult) && state.slots.length > 0 && state.slots.every(slot => state.masters[slot.id]?.previewUrl);
   $('#confirmMasters').disabled = !references || !allReferencesSelected() || !agentMastersReady;
-  $('#generateSamples').disabled = !(storyboard && references && masters) || Boolean(state.sampleJobId && !state.sampleResult);
-  $('#generateFilm').disabled = !samples || Boolean(state.filmJobId && !state.filmResult);
+  // 样片要返工时必须能重开：旧任务没出结果时也要让用户能「重新生成两段样片」，
+  // 否则「样片还要改」这条反馈在产线上没有出口。
+  const samplePending = Boolean(state.sampleJobId && !state.sampleResult);
+  $('#generateSamples').disabled = !(storyboard && references && masters);
+  $('#generateSamplesLabel').textContent = samplePending ? '重新生成两段样片' : '生成两段真实样片';
+  // 全片也要有返工出口：已有任务未出结果时不能把按钮锁死（否则「全片还要改」无处可去）
+  $('#generateFilm').disabled = !samples;
+  $('#generateFilmLabel').textContent = state.filmJobId
+    ? '重新生成本期完整网页预览' : '生成本期完整网页预览';
+  // 返工按钮：只要这一环还有产物可退就必须可用
+  const rejectState = {
+    rejectStoryboard: canReject('storyboard'), rejectReferences: canReject('references'),
+    rejectMasters: canReject('masters'), rejectSamples: canReject('samples'), rejectFilm: canReject('film')
+  };
+  for (const [id, allowed] of Object.entries(rejectState)) {
+    const button = document.getElementById(id);
+    if (button) button.disabled = !allowed;
+  }
   const bothViewed = state.viewedSamples.opening && state.viewedSamples.mechanism;
   $('#confirmSamples').disabled = !(masters && state.sampleResult && bothViewed) || samples;
   $('#masterProgress').textContent = masters ? '全部重绘已确认，可以做两段样片' : agentMastersReady ? 'AI 已重绘完成，请对照左边的参考确认' : state.masterJobId ? '等待 AI 重绘完成，当前还不能确认' : '确认参考后，AI 会照着参考重绘素材';
-  $('#sampleProgress').textContent = samples ? '两段样片已确认，可以生成全片' : state.sampleResult ? bothViewed ? '两段都已查看，请确认后进入全片' : '请分别打开两段样片，都查看过才能确认' : state.sampleJobId ? '等待 AI 制作两段网页样片' : '生成后请分别打开两段样片检查';
+  $('#sampleProgress').textContent = samples ? '两段样片已确认，可以生成全片' : state.sampleResult ? bothViewed ? '两段都已查看，请确认后进入全片' : '请分别打开两段样片，都查看过才能确认' : state.sampleJobId ? '等待 AI 制作两段网页样片；画面要改就点「重新生成两段样片」' : '生成后请分别打开两段样片检查';
   $('#sampleGate').textContent = `两段样片 · ${samples ? '已确认' : state.sampleResult ? '待验收' : '待制作'}`;
   $('#sampleGate').classList.toggle('confirmed-tag', samples);
   $('#filmProgress').textContent = state.filmResult ? '完整预览已生成；导出需要单独确认' : state.filmJobId ? '等待 AI 生成全片，不会自动导出' : '全片会沿用两段样片的结果和确认状态';
@@ -225,8 +317,12 @@ function representativeSamples() {
     ? edited.map(edit => ({ ...(state.analysis?.beats.find(beat => beat.id === edit.id) || {}), ...edit }))
     : state.analysis?.beats || [];
   if (!beats.length) return [];
+  /* 拍 id 现在自由：优先沿用旧语义位置，取不到就退回首拍与中段拍 */
   const opening = beats.find(beat => beat.id === 'gather') || beats[0];
-  const mechanism = beats.find(beat => beat.id === 'switch') || beats.find(beat => beat.id === 'trigger') || beats[1] || beats[0];
+  const mechanism = beats.find(beat => beat.id === 'switch')
+    || beats.find(beat => beat.id === 'trigger')
+    || beats[Math.floor(beats.length / 2)]
+    || beats[1] || beats[0];
   return [
     { id: 'opening', label: '视觉开场', beat: opening },
     { id: 'mechanism', label: '核心机制', beat: mechanism }
@@ -319,9 +415,16 @@ async function loadCandidates(slot, grid, button) {
     }];
   }
   grid.replaceChildren(); grid.className = 'candidates';
-  delete state.selections[slot.id];
-  delete state.masters[slot.id];
-  invalidateConfirmations('references');
+  /* rule: C03 迟到结果不得覆盖已确认闸门
+     参考已经确认过时，这批迟到的检索结果只能作为候补展示：
+     不得清掉已确认的选择，也不得自动改选第一个 —— 否则用户点完「确认参考」
+     之后，正在路上的一批结果会把确认单静默清空（本期缺陷 3）。 */
+  const confirmedSelection = state.confirmations.references ? state.selections[slot.id] : null;
+  if (!confirmedSelection) {
+    delete state.selections[slot.id];
+    delete state.masters[slot.id];
+    invalidateConfirmations('references');
+  }
   candidates.forEach((candidate, index) => {
     candidate.choiceId = `${slot.id}-${String.fromCharCode(65 + index)}`;
     const choice = document.createElement('label'); choice.className = 'candidate'; choice.dataset.candidateId = candidate.id;
@@ -368,9 +471,27 @@ async function loadCandidates(slot, grid, button) {
     grid.appendChild(choice);
   });
   const recommended = grid.querySelector('.candidate-radio:not(:disabled)');
-  if (recommended) { recommended.checked = true; recommended.dispatchEvent(new Event('change', { bubbles: true })); }
+  if (recommended) {
+    if (confirmedSelection) {
+      // 已确认：保留原选择，不自动改选
+      const match = [...grid.querySelectorAll('.candidate')].find(node => node.dataset.candidateId === confirmedSelection.id);
+      if (match) {
+        match.classList.add('selected');
+        const radio = match.querySelector('.candidate-radio');
+        if (radio) radio.checked = true;
+      } else {
+        const notice = document.createElement('p');
+        notice.className = 'slot-status';
+        notice.textContent = '参考已确认过：这批是迟到的新结果，已保留你确认过的选择。要换成新的，请点「↺ 返工：重选参考」。';
+        grid.prepend(notice);
+      }
+    } else {
+      recommended.checked = true;
+      recommended.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
   button.disabled = false;
-  markGeneratedStale();
+  if (!confirmedSelection) markGeneratedStale();
 }
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
@@ -412,7 +533,7 @@ function applyAgentAnalysis(analysis) {
   state.selections = {}; state.masters = {};
   $('#agentHandoff').hidden = true; $('#agentAnalysis').hidden = false;
   $('#analysisSummary').textContent = `${analysis.summary} 已拆解出 ${analysis.beats.length} 句分镜和 ${analysis.assets.length} 项素材需求，请检查并确认。`;
-  renderBeatEditor(); updateGateUI(); updatePreview();
+  renderBeatEditor(); renderDesignCard(); updateGateUI(); updatePreview();
 }
 async function pollAgentJob(jobId) {
   const token = ++state.agentPoll;
@@ -538,6 +659,8 @@ async function researchAll() {
   $('#elementSlots').replaceChildren(summary);
   await Promise.all(state.slots.map(researchSlot));
 }
+/* 画面动作选项 —— 旧五拍保留专属选项；拍 id 现在自由，
+   遇到没见过的 id 就给通用动作表，绝不能因为找不到键就白屏。 */
 const BEAT_ACTIONS = {
   gather: [['component-gather', '组件聚合'], ['logo-reveal', 'Logo 强调']],
   trigger: [['cursor-click', '指针点击'], ['direct-press', '直接按压']],
@@ -545,6 +668,12 @@ const BEAT_ACTIONS = {
   switch: [['state-reflow', '状态切换＋重排'], ['status-only', '仅状态切换']],
   resolve: [['logo-resolve', '品牌聚合定格'], ['hero-hold', '品牌定格']]
 };
+const GENERIC_BEAT_ACTIONS = [
+  ['component-gather', '组件聚合'], ['component-flow', '组件流动'], ['state-reflow', '状态切换＋重排'],
+  ['logo-resolve', '品牌聚合定格'], ['direct-press', '直接按压'], ['cursor-click', '指针点击'],
+  ['card-reflow', '卡片重排'], ['status-only', '仅状态切换'], ['logo-reveal', 'Logo 强调'], ['hero-hold', '品牌定格']
+];
+const beatActions = beatId => BEAT_ACTIONS[beatId] || GENERIC_BEAT_ACTIONS;
 function beatInput() {
   return $$('.beat-row').map(row => ({
     id: row.dataset.beat, label: row.querySelector('[data-field="label"]').value,
@@ -569,12 +698,12 @@ function renderBeatEditor() {
       let control;
       if (field === 'action') {
         control = document.createElement('select');
-        BEAT_ACTIONS[beat.id].forEach(([value, text]) => { const option = document.createElement('option'); option.value = value; option.textContent = text; control.appendChild(option); });
+        beatActions(beat.id).forEach(([value, text]) => { const option = document.createElement('option'); option.value = value; option.textContent = text; control.appendChild(option); });
         control.value = beat.action;
       } else {
         control = document.createElement('input'); control.value = field === 'label' ? beat.label : beat.duration;
         if (field === 'label') { control.maxLength = 16; control.type = 'text'; }
-        else { control.type = 'number'; control.min = 1; control.max = 12; control.step = .25; }
+        else { control.type = 'number'; control.min = 1; control.max = 60; control.step = .25; }
       }
       control.dataset.field = field; control.addEventListener(field === 'action' ? 'change' : 'input', () => { updateBeatSummary(); invalidateConfirmations(); markGeneratedStale(); });
       wrapper.append(caption, control);
@@ -582,9 +711,38 @@ function renderBeatEditor() {
       return wrapper;
     });
     const note = document.createElement('p'); note.className = 'beat-note'; note.textContent = `${beat.narration} ${beat.note}`;
-    row.append(number, ...fields, note); return row;
+    const detail = document.createElement('p'); detail.className = 'beat-design';
+    detail.textContent = beat.focus ? `焦点：${beat.focus}｜动词：${beat.verb || '—'}｜关系：${beat.relation || '—'}｜承接：${beat.carry || '—'}` : '';
+    row.append(number, ...fields, note); if (detail.textContent) row.append(detail); return row;
   }));
   updateBeatSummary();
+}
+
+// 两级设计卡与表E 承接表：闸门1 要让用户审的是「画面逻辑」，不是只有一句旁白
+function renderDesignCard() {
+  const box = $('#designCard');
+  if (!box) return;
+  const card = state.analysis?.designCard;
+  const table = state.analysis?.carryTable;
+  if (!card || !Array.isArray(table) || !table.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const labels = [['motherStructure', '视觉母结构'], ['morphTrack', '形态轨迹'], ['span', '持续时段'], ['carry', '跨句承接'], ['stillFrame', '静止帧语义']];
+  $('#designCardFields').replaceChildren(...labels.map(([key, label]) => {
+    const row = document.createElement('div');
+    const dt = document.createElement('dt'); dt.textContent = label;
+    const dd = document.createElement('dd'); dd.textContent = card[key] || '—';
+    row.append(dt, dd); return row;
+  }));
+  $('#carryTable').replaceChildren(...table.map(row => {
+    const item = document.createElement('div'); item.className = 'carry-row';
+    [['边界', row.boundary], ['谁活下来', row.survivor], ['怎么变', row.how], ['变成什么', row.becomes]].forEach(([label, value]) => {
+      const cell = document.createElement('div');
+      const b = document.createElement('b'); b.textContent = label;
+      const span = document.createElement('span'); span.textContent = value || '—';
+      cell.append(b, span); item.append(cell);
+    });
+    return item;
+  }));
 }
 function storyboardInput() {
   const edits = beatInput();
@@ -747,6 +905,11 @@ async function createProduction(stage) {
 }
 $$('.sample-tabs button').forEach(button => button.addEventListener('click', () => showSample(button.dataset.sample)));
 $('#generateSamples').addEventListener('click', () => createProduction('samples'));
+/* rule: C01 闸门回退必须永远可用 */
+['storyboard', 'references', 'masters', 'samples', 'film'].forEach(id => {
+  const button = document.getElementById('reject' + id[0].toUpperCase() + id.slice(1));
+  if (button) button.addEventListener('click', () => rejectGate(id));
+});
 $('#generateFilm').addEventListener('click', () => createProduction('film'));
 $('#confirmSamples').addEventListener('click', () => {
   if (!state.sampleResult || !state.viewedSamples.opening || !state.viewedSamples.mechanism) return;
@@ -876,11 +1039,35 @@ async function restorePendingProduction(stage) {
   if (value.result) applyProductionResult(stage, value.result);
   else pollProductionJob(stage, jobId);
 }
+/**
+ * 草稿里的 analysis 只是快照；服务端任务里的 analysis 已经过 agent-flow 校验
+ * （两级设计卡、表D 动词、表E 承接表），恢复草稿时必须以服务端为准，
+ * 否则旧快照会把新设计卡覆盖掉，闸门1 就看不到画面逻辑。
+ */
+/* rule: C02 服务端 analysis 是唯一权威 */
+async function authoritativeAnalysis(draft) {
+  try {
+    const response = await fetch(`/api/agent-jobs/${draft.jobId}`, { cache: 'no-store' });
+    const result = await response.json();
+    const server = result?.analysis;
+    if (!server || typeof server !== 'object') return draft.analysis;
+    const draftVersion = Number(draft.analysis?.version || 0);
+    const serverVersion = Number(server.version || 0);
+    const serverHasCard = Boolean(server.designCard && Array.isArray(server.carryTable) && server.carryTable.length);
+    const draftHasCard = Boolean(draft.analysis?.designCard && Array.isArray(draft.analysis?.carryTable) && draft.analysis.carryTable.length);
+    if (serverVersion > draftVersion || (serverHasCard && !draftHasCard)) return server;
+    return draft.analysis;
+  } catch (error) {
+    return draft.analysis;
+  }
+}
 async function loadDraft() {
   const button = $('#loadDraft'); button.disabled = true;
   try {
-    const draft = JSON.parse(localStorage.getItem('motion-layer-draft') || 'null') || serverRecovery;
+    let draft = JSON.parse(localStorage.getItem('motion-layer-draft') || 'null') || serverRecovery;
     if (!draft?.analysis || !draft.jobId || !Array.isArray(draft.slots) || !Array.isArray(draft.beats)) throw new Error('草稿缺少分镜或素材数据');
+    const authoritative = await authoritativeAnalysis(draft);
+    if (authoritative !== draft.analysis) draft = { ...draft, analysis: authoritative };
     state.agentPoll += 1; state.masterPoll += 1; state.productionPoll += 1;
     ['mode', 'style', 'profile', 'fidelity', 'intensity', 'selections', 'slots', 'masters', 'referenceSheet', 'jobId', 'analysis', 'masterJobId', 'masterResult', 'sampleJobId', 'filmJobId', 'sampleResult', 'filmResult', 'activeSample'].forEach(key => {
       if (draft[key] !== undefined) state[key] = draft[key];
@@ -920,7 +1107,7 @@ async function loadDraft() {
       row.querySelector('[data-field="action"]').value = beat.action;
       row.querySelector('[data-field="duration"]').value = beat.duration;
     });
-    updateBeatSummary(); renderRestoredReferences(); renderMasters();
+    updateBeatSummary(); renderRestoredReferences(); renderMasters(); renderDesignCard();
     $('#referenceSheet').textContent = state.referenceSheet || '选择有变化，请重新生成确认单。';
     $('#masterHandoff').hidden = true;
     $('#sampleHandoff').hidden = true; $('#sampleWorkspace').hidden = true; $('#sampleBrief').hidden = true;

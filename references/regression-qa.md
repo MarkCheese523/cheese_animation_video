@@ -57,5 +57,5 @@
 
 1. **timing 边界检查**：解析 config.js，断言每个 timing < 所在页 duration —— 可直接写进 qa-check.mjs
 2. **画面文字 × 字幕重复度检测**：抽取 config 画面文字与 subs.js 做重合比对，整句命中即报红——把 v3 内容规则变成机器可查
-3. **Golden Frames 视觉回归**：关键页定格截图存为基准（`qa-assets/golden/`），改动后 pixel diff，防止视觉无意劣化——也是「70 分不掉回 60 分」的保险
+3. ~~**Golden Frames 视觉回归**~~ ✅ 已实现（2026-11-08）：`templates/kit/visual-regression.js` 在固定视口（1080×1920，dsf=1）下用 `renderAt(t)` 重放关键帧，与基线逐像素比对；基线目录 `<任务目录>/baseline-<片段id>/`，刷新基线只能由人验收后手动 `--update`（Agent 不得自行改基线）。比对结果作为**可见状态**写进语义接触表，不自动阻断交付
 4. **关键词长度检查**：画面文字 >8 字自动提醒

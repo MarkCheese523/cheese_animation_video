@@ -85,9 +85,14 @@
             <div class="option-block"><h3>运动强度</h3><div class="segmented" data-setting="intensity"><button data-value="subtle">柔和</button><button class="active" data-value="balanced">适中</button><button data-value="showreel">强烈</button></div></div>
           </div>
           <div class="motion-rule"><div><span>画面动作</span><b>按你的脚本</b></div><i>＋</i><div><span>用到的素材</span><b>AI 自动识别</b></div><i>＋</i><div><span>时长</span><b>句与句衔接</b></div></div>
+          <div class="design-card" id="designCard" hidden>
+            <div class="design-card-head"><h3>视觉母结构与跨句承接</h3><p>这一版画面按同一主体跨句存活来设计，不是每句换一张版式。请先确认这张设计卡，再确认逐句分镜。</p></div>
+            <dl id="designCardFields" class="design-fields"></dl>
+            <div class="carry-table-wrap"><h4>承接表 · 每个镜头边界谁活下来、怎么变</h4><div id="carryTable" class="carry-table"></div></div>
+          </div>
           <div class="beat-editor"><div class="beat-editor-head"><div><h3>逐句分镜</h3><p>确认每句旁白对应的画面动作；确认后 AI 会按这个方向自动找参考图。</p></div><span id="beatTotal"></span></div><div id="beatRows" class="beat-rows"></div></div>
         </div>
-        <div class="page-actions"><button class="text-button" data-go="direction" type="button">← 返回输入</button><button id="confirmMotion" class="primary" type="button" disabled>确认分镜，进入找图 <span>→</span></button></div>
+        <div class="page-actions"><button class="text-button" data-go="direction" type="button">← 返回输入</button><button id="rejectStoryboard" class="text-button reject-button" type="button" disabled>↺ 返工：重做分镜</button><button id="confirmMotion" class="primary" type="button" disabled>确认分镜，进入找图 <span>→</span></button></div>
       </section>
 
       <section id="elements" class="panel" data-page="elements" hidden>
@@ -95,7 +100,7 @@
         <div class="reference-notice"><p><b>AI 已经从脚本里列出了需要哪些人物、品牌和物品。</b>这里为每一项挑选参考图并确认来源；品牌只用官方素材或纯文字，不手绘仿冒。</p></div>
         <div id="elementSlots" class="element-slots"><div class="empty-state"><span>⌁</span><p>确认分镜后，AI 会在这里列出素材清单和候选参考图。</p></div></div>
         <div class="confirmation-sheet"><button id="buildReferenceSheet" class="secondary" type="button" disabled>生成参考确认单</button><pre id="referenceSheet">选好每一项的参考后，点这里生成确认单。</pre></div>
-        <div class="page-actions"><button class="text-button" data-go="motion" type="button">← 返回分镜</button><span id="referenceProgress">请先为每个元素选择参考</span><button id="confirmReferences" class="primary" type="button" disabled>确认参考，进入重绘 <span>→</span></button></div>
+        <div class="page-actions"><button class="text-button" data-go="motion" type="button">← 返回分镜</button><span id="referenceProgress">请先为每个元素选择参考</span><button id="rejectReferences" class="text-button reject-button" type="button" disabled>↺ 返工：重选参考</button><button id="confirmReferences" class="primary" type="button" disabled>确认参考，进入重绘 <span>→</span></button></div>
       </section>
 
       <section id="redraw" class="panel" data-page="redraw" hidden>
@@ -107,7 +112,7 @@
           <button id="copyMasterPrompt" class="secondary" type="button">复制发送内容</button>
         </div>
         <div id="masterList" class="master-list"></div>
-        <div class="page-actions"><button class="text-button" data-go="elements" type="button">← 返回找图</button><span id="masterProgress">对比左边的参考图，检查形状和特征是否保留</span><button id="confirmMasters" class="primary" type="button">确认全部重绘，进入两段样片 <span>→</span></button></div>
+        <div class="page-actions"><button class="text-button" data-go="elements" type="button">← 返回找图</button><span id="masterProgress">对比左边的参考图，检查形状和特征是否保留</span><button id="rejectMasters" class="text-button reject-button" type="button" disabled>↺ 返工：重做重绘</button><button id="confirmMasters" class="primary" type="button">确认全部重绘，进入两段样片 <span>→</span></button></div>
       </section>
 
       <section id="preview" class="panel preview-panel" data-page="preview" hidden>
@@ -125,7 +130,7 @@
           <div class="sample-tabs" role="tablist" aria-label="代表样片"><button data-sample="opening" role="tab">01 · 视觉开场<small>未查看</small></button><button data-sample="mechanism" role="tab">02 · 核心机制<small>未查看</small></button></div>
           <div class="sample-stage"><div class="video-frame"><iframe id="sampleFrame" title="本期两段样片"></iframe></div><aside class="sample-meta"><p class="eyebrow">当前样片</p><h3 id="sampleTitle"></h3><p id="sampleNarration"></p><dl><div><dt>来自哪句旁白</dt><dd id="sampleSource"></dd></div><div><dt>时长</dt><dd id="sampleDuration"></dd></div><div><dt>用到的素材</dt><dd id="sampleAssets"></dd></div></dl><p id="sampleQa" class="sample-qa"></p></aside></div>
         </div>
-        <div class="page-actions"><button class="text-button" data-go="redraw" type="button">← 返回重绘确认</button><span id="sampleProgress">生成后请分别打开两段样片检查</span><button id="saveDraft" class="secondary" type="button">保存草稿</button><button id="generateSamples" class="primary" type="button">生成两段真实样片 <span>→</span></button><button id="confirmSamples" class="primary" type="button" disabled>确认两段样片，进入全片 <span>→</span></button></div>
+        <div class="page-actions"><button class="text-button" data-go="redraw" type="button">← 返回重绘确认</button><span id="sampleProgress">生成后请分别打开两段样片检查</span><button id="saveDraft" class="secondary" type="button">保存草稿</button><button id="rejectSamples" class="text-button reject-button" type="button" disabled>↺ 返工：重做样片</button><button id="generateSamples" class="primary" type="button"><span id="generateSamplesLabel">生成两段真实样片</span> <span>→</span></button><button id="confirmSamples" class="primary" type="button" disabled>确认两段样片，进入全片 <span>→</span></button></div>
         <p id="saveStatus" class="save-status" aria-live="polite"></p>
       </section>
 
@@ -138,7 +143,7 @@
           <button id="copyFilmPrompt" class="secondary" type="button">复制发送内容</button>
         </div>
         <div id="filmWorkspace" class="film-workspace" hidden><div class="video-frame"><iframe id="filmFrame" title="本期完整网页预览"></iframe></div><div id="filmResultSummary" class="film-result-summary"></div></div>
-        <div class="page-actions"><button class="text-button" data-go="preview" type="button">← 返回两段样片</button><span id="filmProgress">全片会沿用两段样片的结果和确认状态</span><button id="generateFilm" class="primary" type="button">生成本期完整网页预览 <span>→</span></button></div>
+        <div class="page-actions"><button class="text-button" data-go="preview" type="button">← 返回两段样片</button><span id="filmProgress">全片会沿用两段样片的结果和确认状态</span><button id="rejectFilm" class="text-button reject-button" type="button" disabled>↺ 返工：重做全片</button><button id="generateFilm" class="primary" type="button"><span id="generateFilmLabel">生成本期完整网页预览</span> <span>→</span></button></div>
       </section>
     </div>
   </main>

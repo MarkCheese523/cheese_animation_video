@@ -4,23 +4,44 @@ import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { parseSrt } from './templates/kit/contactsheet.js';
+import { SEM_TAGS } from './templates/kit/master.js';
 
 const ROOT = path.resolve('studio/agent-jobs');
 const UPLOADS = path.resolve('studio/agent-inbox');
-const BEAT_IDS = ['gather', 'trigger', 'split', 'switch', 'resolve'];
-const ACTIONS = {
+
+/* 拍数不是模板常量 —— 它由本期语义段落数决定。
+   之前的实现把「五拍」写死（BEAT_IDS + length !== 5），
+   结果这一期的偶然结果被当成了通用模板：视频一长，拆解根本写不进去。
+   现在只保留两条边界：下限（拍太少撑不起一段完整机制）与上限（太多就没法做承接连续）。 */
+const BEAT_COUNT = { min: 3, max: 40 };
+const BEAT_DURATION = { min: 1, max: 60 };
+/* 画面动作词表 —— 不再按拍 id 绑定。
+   旧的五拍各带两个专属动作，这里保留为「已知拍 id 的优先项」以兼容内置演示，
+   未知拍 id 走通用动作表。 */
+const BEAT_ACTION_PREFERENCE = {
   gather: ['component-gather', 'logo-reveal'],
   trigger: ['cursor-click', 'direct-press'],
   split: ['component-flow', 'card-reflow'],
   switch: ['state-reflow', 'status-only'],
   resolve: ['logo-resolve', 'hero-hold']
 };
+const GENERIC_ACTIONS = [
+  'component-gather', 'component-flow', 'state-reflow', 'logo-resolve', 'direct-press',
+  'cursor-click', 'card-reflow', 'status-only', 'logo-reveal', 'hero-hold'
+];
 const MODES = new Set(['generic', 'product']);
 const STYLES = new Set(['cream-neon', 'dark-narrative', 'cheeseheart-tech']);
 const INTENSITIES = new Set(['subtle', 'balanced', 'showreel']);
 const FIDELITIES = new Set(['faithful', 'component', 'abstract']);
 const VISUAL_KINDS = new Set(['generic', 'company', 'institution', 'fund', 'trust', 'voting', 'chair', 'vote']);
 const RESEARCH_ROUTES = new Set(['auto', 'web', 'icon', 'semantic']);
+// 表D 视觉动词表（references/execution-contract.md）：画面动作只能取自这张表，
+// 位移／淡入淡出／缩放／呼吸旋转只是运动手段，不能自己充当叙事动作。
+const VISUAL_VERBS = new Set([
+  '出现', '登场', '落下', '归位', '长成', '展开', '归档', '分出', '注入', '堵住',
+  '滴出', '盖章', '标红', '运转', '停住', '划掉', '计数', '走进', '指向', '提问'
+]);
 const EXTENSIONS = new Set(['.srt', '.txt', '.md', '.json', '.mp3', '.wav', '.m4a', '.png', '.jpg', '.jpeg', '.webp', '.svg', '.mp4', '.mov', '.webm']);
 
 function text(value, fallback = '', limit = 200) {
@@ -47,14 +68,35 @@ function cleanAttachments(input) {
     return { name: text(item.name, '附件', 160), url, kind: text(item.kind, 'attachment', 30) };
   });
 }
-function handoffPrompt(jobId) {
+function handoffPrompt(jobId, plan = {}) {
   const directory = `studio/agent-jobs/${jobId}`;
+  const suggested = plan.suggested || BEAT_COUNT.min;
   return [
     `请处理 Cheese Motion Agent 任务 ${jobId}。`,
     `读取 ${directory}/job.json 与 ${directory}/analysis.schema.json，使用 html-animation-video skill 对输入整包进行真实语义拆解。`,
     `请生成本期分镜与素材需求（包括脚本和品牌中的 Logo，不要要求用户预先列清单），将结果写入 ${directory}/analysis.json。`,
+    /* rule: E28 拍数由语义段落数决定 */
+    `分镜拍数由本期语义段落数决定，不是固定值：本期字幕共 ${plan.sentences || '—'} 句，建议不超过 ${suggested} 拍（一个视觉机制可以跨多句，所以实际可能更少），允许范围 ${BEAT_COUNT.min}–${BEAT_COUNT.max} 拍。不要套用固定拍数。`,
     '只写结构化结果，不替用户确认分镜、参考或母版；完成后回复“拆解已回写”。'
   ].join('\n');
+}
+
+/* 拍数建议：句数是上界 —— 一拍至少要承载一句旁白，一个段落也可以跨多句。 */
+function suggestedBeatCount(sentences) {
+  if (!Number.isFinite(sentences) || sentences <= 0) return BEAT_COUNT.min;
+  return Math.min(BEAT_COUNT.max, Math.max(BEAT_COUNT.min, sentences));
+}
+
+/* 从已上传的 SRT 里数句子 —— 拍数建议的唯一依据。 */
+async function srtSentenceCount(attachments) {
+  const srt = attachments.find(item => /\.srt$/i.test(item.name || '') || /\.srt$/i.test(item.url || ''));
+  if (!srt) return 0;
+  try {
+    const raw = await readFile(path.join(UPLOADS, path.basename(srt.url)), 'utf8');
+    return parseSrt(raw).length;
+  } catch {
+    return 0;
+  }
 }
 
 export async function createAgentJob(input = {}) {
@@ -66,6 +108,10 @@ export async function createAgentJob(input = {}) {
   const mode = MODES.has(input.mode) ? input.mode : 'generic';
   const jobId = `motion-${randomUUID()}`;
   const directory = jobDirectory(jobId);
+  /* 拍数建议来自 SRT 句数，不是常量 */
+  const sentences = await srtSentenceCount(attachments);
+  const suggested = suggestedBeatCount(sentences);
+  const beatPlan = { sentences, suggested, min: BEAT_COUNT.min, max: BEAT_COUNT.max };
   const job = {
     version: 1, id: jobId, createdAt: new Date().toISOString(), script, mode,
     style: STYLES.has(input.style) ? input.style : 'cream-neon',
@@ -73,40 +119,110 @@ export async function createAgentJob(input = {}) {
     fidelity: FIDELITIES.has(input.fidelity) ? input.fidelity : 'component',
     aspect: ['16:9', '9:16', '1:1'].includes(input.aspect) ? input.aspect : '9:16',
     notes: text(input.notes, '', 4000), profile: cleanProfile(input.profile, mode),
-    attachments, status: 'awaiting_agent'
+    attachments, beatPlan, status: 'awaiting_agent'
   };
+  const beatIds = Array.from({ length: suggested }, (_, index) => `beat-${index + 1}`);
   const schema = {
     jobId,
     summary: '本期叙事与视觉拆解摘要',
-    beats: BEAT_IDS.map((id, index) => ({
+    designCard: {
+      motherStructure: '视觉母结构：观众持续追踪的主体关系是什么',
+      morphTrack: '形态轨迹：从什么形态变成什么形态，每次变形表达什么',
+      span: '持续时段：这个机制覆盖哪些句子、从何时到何时',
+      carry: '跨句承接：相邻句之间同一对象怎样继续运动',
+      stillFrame: '静止帧语义：任取一帧，关掉字幕还能看出什么关系'
+    },
+    /* 拍数建议已经按句数算好，但这是建议不是规定：
+       实际拍数由语义段落数决定，可以比建议值少（一个机制跨多句），范围 3–40 拍。 */
+    beats: beatIds.map((id, index) => ({
       id, label: `第 ${index + 1} 拍短标题`, duration: 3,
-      action: ACTIONS[id][0], note: '这一拍可见的动作与信息增量', narration: '对应旁白', assetIds: []
+      action: GENERIC_ACTIONS[index % GENERIC_ACTIONS.length], note: '这一拍可见的动作与信息增量', narration: '对应旁白', assetIds: [],
+      focus: '本拍唯一焦点（主语），观众此刻只看这里',
+      verb: '出现',
+      relation: '观众应看懂的关系',
+      soundCue: '声音 cue',
+      carry: '本拍如何承接上一拍的同一主体（同一 DOM 身份继续运动）'
+    })),
+    carryTable: beatIds.slice(1).map((id, index) => ({
+      boundary: `${beatIds[index]} → ${id}`,
+      survivor: '上一拍活下来的对象',
+      how: '怎么变（表E 决策树路径：morphRect / emit / gather / hop）',
+      becomes: '下一拍它是什么'
     })),
     assets: [{
       id: 'N1', code: 'N1', concept: '由 Agent 从脚本识别的重要名词或真实对象', query: '英文互联网或公开图标检索词',
-      action: '可见动作', researchRoute: 'auto', brandOnly: false, semanticOnly: false, visualKind: '', semanticName: '', rights: '', fallback: 'lucide:shapes', brandAssets: []
-    }]
+      action: '可见动作', sem: '', researchRoute: 'auto', brandOnly: false, semanticOnly: false, visualKind: '', semanticName: '', rights: '', fallback: 'lucide:shapes', brandAssets: []
+    }],
+    /* 素材语义词表：sem 必须从这张表里选，它就是本期母版语义字典的来源 */
+    _semanticTags: [...SEM_TAGS]
   };
   await mkdir(directory, { recursive: true });
   await Promise.all([
     writeFile(path.join(directory, 'job.json'), `${JSON.stringify(job, null, 2)}\n`, 'utf8'),
     writeFile(path.join(directory, 'analysis.schema.json'), `${JSON.stringify(schema, null, 2)}\n`, 'utf8'),
-    writeFile(path.join(directory, 'request.md'), `${handoffPrompt(jobId)}\n`, 'utf8')
+    writeFile(path.join(directory, 'request.md'), `${handoffPrompt(jobId, beatPlan)}\n`, 'utf8')
   ]);
-  return { jobId, status: job.status, prompt: handoffPrompt(jobId), jobUrl: `/studio/agent-jobs/${jobId}/job.json` };
+  return { jobId, status: job.status, prompt: handoffPrompt(jobId, beatPlan), jobUrl: `/studio/agent-jobs/${jobId}/job.json` };
 }
 
 function cleanBeat(beat, index) {
-  const id = BEAT_IDS[index];
-  if (beat?.id !== id) throw new Error(`分镜第 ${index + 1} 拍必须使用 ${id}`);
+  const id = text(beat?.id, '', 60).toLowerCase() || `beat-${index + 1}`;
+  if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(id)) throw new Error(`分镜第 ${index + 1} 拍的 id「${id}」不合法（只能用小写字母、数字与连字符）`);
   const duration = Number(beat.duration);
-  if (!Number.isFinite(duration) || duration < 1 || duration > 12) throw new Error(`${id} 时长需在 1–12 秒之间`);
+  if (!Number.isFinite(duration) || duration < BEAT_DURATION.min || duration > BEAT_DURATION.max) throw new Error(`${id} 时长需在 ${BEAT_DURATION.min}–${BEAT_DURATION.max} 秒之间`);
+  // 两级设计卡的逐句部分：焦点、视觉动词、观众应看懂的关系、声音 cue、跨句承接缺一不可
+  const focus = text(beat.focus, '', 160);
+  /* rule: E01 每拍唯一焦点 */
+  if (!focus) throw new Error(`${id} 缺少本拍唯一焦点（focus）——表D 要求观众此刻只能看一个地方`);
+  const verb = text(beat.verb, '', 20);
+  /* rule: E02 视觉动词必须来自动词表 */
+  if (!VISUAL_VERBS.has(verb)) throw new Error(`${id} 的视觉动词「${verb || '空'}」不在表D 动词表内，只能用：${[...VISUAL_VERBS].join('、')}`);
+  const relation = text(beat.relation, '', 400);
+  if (!relation) throw new Error(`${id} 缺少「观众应看懂的关系」`);
+  const soundCue = text(beat.soundCue, '', 300);
+  if (!soundCue) throw new Error(`${id} 缺少声音 cue`);
+  const carry = text(beat.carry, '', 400);
+  /* rule: E03 每拍必须写清跨句承接 */
+  if (!carry) throw new Error(`${id} 缺少跨句承接说明——同一主体必须跨句继续运动，不能每句换场`);
+  const preference = BEAT_ACTION_PREFERENCE[id] || GENERIC_ACTIONS;
   return {
     id, label: text(beat.label, id, 16), duration,
-    action: ACTIONS[id].includes(beat.action) ? beat.action : ACTIONS[id][0],
+    action: preference.includes(beat.action) ? beat.action : preference[0],
     note: text(beat.note, '可见动作与信息增量', 300), narration: text(beat.narration, '', 1000),
+    focus, verb, relation, soundCue, carry,
     assetIds: Array.isArray(beat.assetIds) ? beat.assetIds.slice(0, 18).map(value => text(value, '', 60)).filter(Boolean) : []
   };
+}
+
+// 两级设计卡的第一级：按语义段落写视觉母结构 → 形态轨迹 → 起止时间 → 跨句承接 → 静止帧语义
+function cleanDesignCard(card) {
+  const fields = ['motherStructure', 'morphTrack', 'span', 'carry', 'stillFrame'];
+  const out = {};
+  for (const field of fields) {
+    const value = text(card?.[field], '', 800);
+    /* rule: E04 两级设计卡五字段必填 */
+    if (!value) throw new Error(`两级设计卡缺少「${field}」：视觉母结构、形态轨迹、持续时段、跨句承接、静止帧语义必须先写完再进制作`);
+    out[field] = value;
+  }
+  return out;
+}
+
+// 表E 承接表：每个镜头边界都要写清谁活下来、怎么变、变成什么，不允许空行
+function cleanCarryTable(rows, beatIds) {
+  const boundaries = Math.max(0, beatIds.length - 1);
+  if (!Array.isArray(rows) || rows.length !== boundaries) {
+    /* rule: E05 表E 承接表不得有空行 */
+    throw new Error(`表E 承接表必须覆盖 ${boundaries} 个镜头边界（每两个相邻拍之间一行）`);
+  }
+  return rows.map((row, index) => {
+    const survivor = text(row?.survivor, '', 240);
+    const how = text(row?.how, '', 360);
+    const becomes = text(row?.becomes, '', 240);
+    if (!survivor || !how || !becomes) {
+      throw new Error(`表E 承接表第 ${index + 1} 行有空缺：每个边界都要写清谁活下来、怎么变、变成什么`);
+    }
+    return { boundary: text(row?.boundary, '', 80) || `${beatIds[index]} → ${beatIds[index + 1]}`, survivor, how, becomes };
+  });
 }
 function cleanAsset(asset, index) {
   const id = text(asset?.id, '', 60);
@@ -114,10 +230,14 @@ function cleanAsset(asset, index) {
   const brandOnly = asset.brandOnly === true || /^B\d+$/.test(id);
   const semanticOnly = asset.semanticOnly === true;
   const researchRoute = RESEARCH_ROUTES.has(asset.researchRoute) ? asset.researchRoute : 'auto';
+  /* 素材声明「它到底是什么图形」—— 这份声明是本期母版语义字典的来源，
+     检索期、绘制期、校验期都按它走（同一张字典，跨期不共享）。 */
+  const sem = text(asset?.sem, '', 40);
+  if (sem && !SEM_TAGS.has(sem)) throw new Error(`素材 ${id} 声明的语义「${sem}」不在语义词表内，只能用：${[...SEM_TAGS].join('、')}`);
   return {
     id, code: text(asset.code, id, 60), concept: text(asset.concept, id, 80),
     query: text(asset.query, '', 160), action: text(asset.action, '出现、响应', 120),
-    researchRoute: brandOnly && researchRoute === 'auto' ? 'web' : researchRoute,
+    sem, researchRoute: brandOnly && researchRoute === 'auto' ? 'web' : researchRoute,
     brandOnly, semanticOnly, abstractOnly: asset.abstractOnly === true,
     visualKind: VISUAL_KINDS.has(asset.visualKind) ? asset.visualKind : '',
     semanticName: text(asset.semanticName, '', 160), rights: text(asset.rights, '', 500),
@@ -129,14 +249,21 @@ function cleanAsset(asset, index) {
 export function validateAgentAnalysis(input = {}, expectedJobId = '') {
   const jobId = safeId(input.jobId);
   if (!jobId || (expectedJobId && jobId !== expectedJobId)) throw new Error('拆解结果的任务 ID 不匹配');
-  if (!Array.isArray(input.beats) || input.beats.length !== 5) throw new Error('当前组件样片需要 Agent 返回五拍分镜');
+  /* rule: E28 拍数由语义段落数决定，不是固定值 */
+  if (!Array.isArray(input.beats) || input.beats.length < BEAT_COUNT.min || input.beats.length > BEAT_COUNT.max) {
+    throw new Error(`本期分镜必须落在 ${BEAT_COUNT.min}–${BEAT_COUNT.max} 拍之间（拍数由语义段落数决定，不是固定值）`);
+  }
+  const designCard = cleanDesignCard(input.designCard);
   const beats = input.beats.map(cleanBeat);
+  const beatIds = beats.map(beat => beat.id);
+  if (new Set(beatIds).size !== beatIds.length) throw new Error('分镜 id 不得重复');
+  const carryTable = cleanCarryTable(input.carryTable, beatIds);
   const assets = Array.isArray(input.assets) ? input.assets.slice(0, 18).map(cleanAsset) : [];
   if (!assets.length) throw new Error('Agent 至少需要返回一项素材需求');
   const ids = new Set(assets.map(asset => asset.id));
   if (ids.size !== assets.length) throw new Error('素材 ID 不得重复');
   beats.forEach(beat => beat.assetIds.forEach(id => { if (!ids.has(id)) throw new Error(`分镜引用了不存在的素材 ${id}`); }));
-  return { version: 1, jobId, summary: text(input.summary, '', 2000), beats, assets, analyzedAt: new Date().toISOString() };
+  return { version: 2, jobId, summary: text(input.summary, '', 2000), designCard, beats, carryTable, assets, analyzedAt: new Date().toISOString() };
 }
 
 export async function saveAgentAnalysis(jobId, input) {
@@ -165,7 +292,7 @@ export async function readAgentJob(jobId) {
   let draft = null;
   try { analysis = JSON.parse(await readFile(path.join(directory, 'analysis.json'), 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   try { draft = JSON.parse(await readFile(path.join(directory, 'draft.json'), 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  return { job, analysis, draft, status: analysis ? 'analysis_ready' : 'awaiting_agent', prompt: handoffPrompt(jobId) };
+  return { job, analysis, draft, status: analysis ? 'analysis_ready' : 'awaiting_agent', prompt: handoffPrompt(jobId, job.beatPlan || {}) };
 }
 
 export async function readLatestAgentJob() {

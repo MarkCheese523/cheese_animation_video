@@ -89,14 +89,26 @@ async function returnMastersResult() {
 async function returnSamplesResult() {
   const { jobId, job } = await productionJob('samples');
   const beats = job.package.beats;
+  /* 拍 id 现在自由：沿用旧语义位置，取不到就退回首拍与中段拍（与 studio/app.js 一致） */
   const opening = beats.find(beat => beat.id === 'gather') || beats[0];
-  const mechanism = beats.find(beat => beat.id === 'switch') || beats.find(beat => beat.id === 'trigger') || beats[1];
+  const mechanism = beats.find(beat => beat.id === 'switch') || beats.find(beat => beat.id === 'trigger') || beats[Math.floor(beats.length / 2)] || beats[1];
   const dir = path.join(root, 'studio', 'production-jobs', jobId);
   for (const [id, beat] of [['opening', opening], ['mechanism', mechanism]]) {
     mkdirSync(path.join(dir, id), { recursive: true });
     writeFileSync(path.join(dir, id, 'index.html'), `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>${beat.label}</title><body data-real-sample="${id}"><h1>${beat.label}</h1><p>${beat.narration}</p><script>window.__seek=function(t){document.body.dataset.time=String(t)};<\/script></body></html>`);
   }
-  const sample = (id, kind, beat) => ({ id, kind, sourceBeatId: beat.id, title: beat.label, narration: beat.narration, duration: beat.duration, assetIds: beat.assetIds, previewUrl: `/studio/production-jobs/${jobId}/${id}/index.html`, qa: 'PASS 浏览器、关键帧与本任务网页路径' });
+  /* 样片必须覆盖连续两拍（E06/E07）并写清跨句演化（E08）—— 覆盖范围从实际拍次里取 */
+  const coversOf = beat => {
+    const index = beats.findIndex(item => item.id === beat.id);
+    const from = Math.max(0, Math.min(index, beats.length - 2));
+    return beats.slice(from, from + 2).map(item => item.id);
+  };
+  const sample = (id, kind, beat) => ({
+    id, kind, sourceBeatId: beat.id, coversBeats: coversOf(beat),
+    carry: '这两拍之间同一主体保持同一 DOM 身份继续运动并改变形态',
+    title: beat.label, narration: beat.narration, duration: beat.duration, assetIds: beat.assetIds,
+    previewUrl: `/studio/production-jobs/${jobId}/${id}/index.html`, qa: 'PASS 浏览器、关键帧与本任务网页路径'
+  });
   const result = {
     jobId, stage: 'samples',
     designBrief: { reference: '本期已确认分镜与产品档案', palette: ['#c6ff3d'], typography: '本期字体角色', assetLanguage: '只调用已确认母版', motionCharacter: '动作先于版式', keyFrames: [opening.label, mechanism.label] },
@@ -239,7 +251,7 @@ try {
   if (packet.elements.some(element => !element.selected.referenceApproved || !element.selected.master?.approved)) throw new Error('参考或母版确认未逐项写入制作整包');
   if (packet.elements.some(element => element.selected.master.agentJobId !== masterJobId || !element.selected.master.previewUrl.includes(`/production-jobs/${masterJobId}/masters/`))) throw new Error('后续制作整包未追溯 Agent 真实母版');
   if (packet.elements[0].slotId !== 'G0' || packet.elements[0].selected.visualKind !== 'generic' || packet.elements[0].selected.master.variant !== 'accent') throw new Error('G0 推荐或母版变体未写入制作整包');
-  if (packet.profile.name !== 'Component Demo' || packet.motion.intensity !== 'balanced' || packet.beats.length !== 5 || !packet.beats.every(beat => beat.narration && beat.note && Array.isArray(beat.assetIds))) throw new Error('产品档案、五拍或原始旁白资产信息未完整写入');
+  if (packet.profile.name !== 'Component Demo' || packet.motion.intensity !== 'balanced' || packet.beats.length < 3 || !packet.beats.every(beat => beat.narration && beat.note && Array.isArray(beat.assetIds))) throw new Error('产品档案、分镜或原始旁白资产信息未完整写入');
   const editedConcept = packet.elements.find(element => element.slotId === 'N1');
   if (editedConcept?.action !== '绘制、展开、确权' || editedConcept?.query !== 'document') throw new Error('同屏修正的语义与检索词未写入制作整包');
 
@@ -311,7 +323,7 @@ try {
   const { job: editedJob } = await productionJob('samples');
   const edited = editedJob.package;
   if (edited.motion.intensity !== 'showreel' || edited.beats[0].label !== '开场聚集' || edited.beats[0].duration !== 4 || edited.beats[0].narration !== '先建立可转让的凭证。' || edited.beats[1].action !== 'direct-press') throw new Error('修改后的分镜、强度与原始旁白未正确进入新样片任务');
-  if (!await evaluate(`JSON.parse(localStorage.getItem('motion-layer-draft')).beats?.length === 5`)) throw new Error('五拍编辑未保存到草稿');
+  if (!await evaluate(`(JSON.parse(localStorage.getItem('motion-layer-draft')).beats?.length || 0) >= 3`)) throw new Error('分镜编辑未保存到草稿');
 
   await cdp('Page.navigate', { url: `http://127.0.0.1:${port}/studio/demo/player.html?scene=motion-study&export=1` });
   await waitExpression(`document.readyState === 'complete' && document.querySelector('[data-scene="motion-study"]') && typeof window.__seek === 'function'`);

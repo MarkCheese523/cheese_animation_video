@@ -95,7 +95,7 @@ design brief 内容（半页纸，不追求完备）：
 | 完整 design token 层 | 一致性靠记忆 | **P0**（一次建设） |
 | SVG 贴纸库 | 视觉上限被 CSS+emoji 锁死 | P1 |
 | 统一动效语法表 | 动效性格不稳定 | P1（并入 token） |
-| Golden Frames 视觉回归 | 改动可能无声劣化 | P1（见 regression-qa.md） |
+| Golden Frames 视觉回归 | 改动可能无声劣化 | ✅ 已实现（2026-11-08，`templates/kit/visual-regression.js`，见 regression-qa.md 第五节） |
 | 灵感库/moodboard 机制 | 参考靠临时搜索 | P2 |
 | 字体排印规范 | 字号现场发明 | P2 |
 | 手绘素材扫描管线 | 无人格化资产 | P3（长期） |

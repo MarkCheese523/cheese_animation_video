@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>视觉回归夹具</title>
+<style>
+html,body{margin:0;padding:0;background:#0d1a16;width:1080px;height:1920px;overflow:hidden}
+#box{position:absolute;left:200px;top:600px;width:400px;height:400px;background:#c6ff3d}
+</style></head><body>
+<div id="box"></div>
+<script>
+  /* 视觉回归夹具：一个纯函数式的 renderAt(t)。
+     颜色与尺寸由 query 决定，这样同一份夹具可以渲染出「完全一致」和「被悄悄改了」的两种画面，
+     用来验证像素比对既能放过一致、又能抓住改动。 */
+  const params = new URLSearchParams(location.search);
+  const color = params.get('c') || '#c6ff3d';
+  const size = Number(params.get('s') || 400);
+  window.renderAt = function (t) {
+    const box = document.getElementById('box');
+    box.style.background = color;
+    box.style.width = size + 'px';
+    box.style.height = size + 'px';
+    document.body.setAttribute('data-t', String(t));
+  };
+  window.renderAt(0);
+</script></body></html>
