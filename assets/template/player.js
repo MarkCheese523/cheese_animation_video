@@ -28,6 +28,22 @@ function showError(error) {
   document.body.appendChild(panel);
   console.error(error);
 }
+
+/* 量纲防呆（规则 E30）：scene.duration 的单位是【秒】，timing 才是【毫秒】。
+   一段 12.6 秒写成 duration: 12634 时，播放器会安静地把它当 3.5 小时渲染 ——
+   所以这里直接给一条红色横幅，而不是让人对着静止画面猜。 */
+const MAX_SCENE_SECONDS = 600;
+function warnDimension(scene) {
+  if (!(typeof scene.duration === 'number') || scene.duration <= MAX_SCENE_SECONDS) return;
+  const message = `场景「${scene.id}」的 duration = ${scene.duration}，超过 ${MAX_SCENE_SECONDS} 秒 —— `
+    + '疑似把毫秒写成了秒（duration 单位是秒，timing 单位是毫秒）';
+  document.body.dataset.dimensionError = message;
+  const banner = document.createElement('div');
+  banner.className = 'player-dimension-warn';
+  banner.textContent = message;
+  document.body.appendChild(banner);
+  console.error('[dimension] ' + message);
+}
 window.addEventListener('error', event => showError(event.error || event.message));
 window.addEventListener('unhandledrejection', event => showError(event.reason));
 
@@ -153,6 +169,7 @@ async function init() {
   for (let x = 0; x <= W; x += 90) el('line', { x1: x, y1: 0, x2: x, y2: H, stroke: '#102a22', 'stroke-opacity': .05 }, grid);
   for (let y = 0; y <= H; y += 90) el('line', { x1: 0, y1: y, x2: W, y2: y, stroke: '#102a22', 'stroke-opacity': .05 }, grid);
   project.scenes.forEach(scene => {
+    warnDimension(scene);
     const group = el('g', { 'data-scene': scene.id }, sceneRoot);
     currentRoot = group;
     const builder = SCENE_BUILDERS[scene.type];

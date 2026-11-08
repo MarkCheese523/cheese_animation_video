@@ -2,7 +2,7 @@
 //
 // 为什么要有它：
 //   本期最有价值的缺陷不是某个画面错了，而是「规则写在文档里、代码里一处都没有」——
-//   execution-contract.md 的表D/表E 通过条件写得很完整，却从来没被任何代码读过。
+//   execution-contract.md 拆分前的表D/表E 通过条件写得很完整，却从来没被任何代码读过。
 //   本脚本把规则注册表渲染成唯一索引，让「规则有没有落地」变成可执行的事实，
 //   而不是靠人记得。
 //
@@ -28,13 +28,13 @@ rules.sort((a, b) => a.id.localeCompare(b.id));
 
 /* A 类（审美取向）无法机器判定，列在这里提醒：它们由人在闸门上判断，不写进注册表。 */
 const MANUAL_CLASS = [
-  ['画面文字 = 关键词（≤8 字）+ 每期限 2～3 处金句', 'SKILL.md#五'],
-  ['音效克制：全片只保留关键仪式音', 'SKILL.md#五'],
-  ['静音看得懂：关掉字幕仍能读出变化', 'SKILL.md#〇之二'],
-  ['手绘／贴纸／撕纸／胶带／印章视觉语言', 'SKILL.md#五'],
-  ['视觉母结构必须随语义真实演化（保留 DOM 只是技术底线）', 'SKILL.md#〇之三'],
-  ['品牌只用官方矢量，拿不到就用纯文字标识', 'SKILL.md#〇-7'],
-  ['人物只留头肩外轮廓 + 点阵填充，不重建五官', 'SKILL.md#〇-9']
+  ['画面文字 = 关键词（≤8 字）+ 每期限 2～3 处金句', 'SKILL.md#五审美取向'],
+  ['音效克制：全片只保留关键仪式音', 'SKILL.md#五审美取向'],
+  ['静音看得懂：关掉字幕仍能读出变化', 'SKILL.md#〇执行提示词'],
+  ['手绘／贴纸／撕纸／胶带／印章视觉语言', 'SKILL.md#五审美取向'],
+  ['视觉母结构必须随语义真实演化（保留 DOM 只是技术底线）', 'references/semantic-scenes.md#判断标准'],
+  ['品牌只用官方矢量，拿不到就用纯文字标识', 'SKILL.md#五审美取向'],
+  ['人物只留头肩外轮廓 + 点阵填充，不重建五官', 'SKILL.md#五审美取向']
 ];
 
 const typeLabel = { A: 'A 审美（人判）', B: 'B 工艺（机器判）', C: 'C 协作（流程判）' };
@@ -88,7 +88,7 @@ lines.push('```js');
 lines.push('// references/rules/<编号>-<短标题>.rule.mjs');
 lines.push('export default {');
 lines.push("  id: 'E01', type: 'B', title: '每拍只有一个焦点',");
-lines.push("  source: 'references/execution-contract.md#表D',   // 文档出处（单向：文档 → 规则）");
+lines.push("  source: 'references/visual-verbs.md#动词与引擎实现',   // 文档出处（单向：文档 → 规则）");
 lines.push('  defects: [\'12\'],                                // 关联的真实缺陷编号');
 lines.push("  status: 'active',");
 lines.push('  implementation: { file: \'agent-flow.mjs\', marker: \'rule: E01\' },');

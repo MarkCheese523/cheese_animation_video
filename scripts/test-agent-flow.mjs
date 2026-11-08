@@ -46,7 +46,8 @@ try {
   noFocus.beats[2].focus = '';
   assert.throws(() => validateAgentAnalysis(noFocus, job.jobId), /焦点/);
   const emptyCarry = structuredClone(analysis);
-  emptyCarry.carryTable[1].how = '';
+  emptyCarry.carryTable[1].method = '';
+  emptyCarry.carryTable[1].detail = '';
   assert.throws(() => validateAgentAnalysis(emptyCarry, job.jobId), /承接表/);
   const shortCarry = structuredClone(analysis);
   shortCarry.carryTable = shortCarry.carryTable.slice(0, 2);

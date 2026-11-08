@@ -32,11 +32,13 @@ export function makeAgentAnalysis(jobId, { product = false, brands = [] } = {}) 
       { id: 'switch', label: '到期失效', duration: 4.75, action: 'state-reflow', note: '过期后权利退去并显示失效', narration: '过期后失效。', focus: '到期的凭证块', verb: '停住', relation: '凭证到了期限，状态从可转让变成失效', soundCue: '失效瞬间短促收尾', carry: '凭证块飞到终点后停住并变灰，DOM 身份保持不变', assetIds: ['N4'] },
       { id: 'resolve', label: '确认并同步', duration: 3.25, action: 'logo-resolve', note: '确认操作驱动数据同步与品牌归位', narration: '点击确认，数据同步完成。', focus: '归位的凭证与品牌标识', verb: '归位', relation: '失效的凭证被确认后重新归位到品牌标识旁', soundCue: '归位落点给一个收束音', carry: '停住的凭证块重新被同一主体接住，归位到品牌标识下方', assetIds: ['N5', 'N6', 'N7', ...brandList.map((_, index) => `B${index + 1}`)] }
     ],
+    /* 表E 的「怎么变」是枚举（method），不是自由文本 —— 自由文本会退化成套话（E33）。
+       具体描述放在 detail 里，必须写出具体形态与去向。 */
     carryTable: [
-      { boundary: 'gather → trigger', survivor: '凭证本体（N1）', how: '按压（morphRect / 盖章）', becomes: '裂成两块可转让权利' },
-      { boundary: 'trigger → split', survivor: '拆出的凭证块（N2）', how: '沿路径飞行（act x 轨道）', becomes: '交接中的权利模块' },
-      { boundary: 'split → switch', survivor: '到达终点的凭证块', how: '落进槽位（hop）', becomes: '到期的凭证' },
-      { boundary: 'switch → resolve', survivor: '失效的凭证块', how: '重新被接住并归位（gather / hop）', becomes: '品牌标识旁的收束凭证' }
+      { boundary: 'gather → trigger', survivor: '凭证本体（N1）', method: '分出多个', detail: '整块凭证被按压后沿纵向裂成两块可转让权利，中心 y 从 780 降到 900', becomes: '裂成两块可转让权利' },
+      { boundary: 'trigger → split', survivor: '拆出的凭证块（N2）', method: '落下', detail: '其中一块沿 x 轨道从 (300,900) 移到 (780,900)，落进对方手里的槽位', becomes: '交接中的权利模块' },
+      { boundary: 'split → switch', survivor: '到达终点的凭证块', method: '归档', detail: '凭证块飞进右下角归档槽位 (860,1100) 并缩小淡出，描边转为失效色', becomes: '到期的凭证' },
+      { boundary: 'switch → resolve', survivor: '失效的凭证块', method: '多个汇成一个', detail: '归档槽位里的碎片向上聚拢回品牌标识下方 (540,700)，重新合成一块凭证', becomes: '品牌标识旁的收束凭证' }
     ],
     assets
   };
@@ -54,9 +56,15 @@ export function scaleAgentAnalysis(analysis, count, { ids } = {}) {
     label: `第 ${index + 1} 拍`,
     narration: `第 ${index + 1} 句旁白。`
   }));
+  /* 手法枚举轮转 + 每行描述各不相同 —— 这才是「填对」的样子。
+     全用同一句套话会被 E33 的去重率断言拦下。 */
+  const methods = ['长成', '展开', '归档', '落下', '分出多个', '多个汇成一个', '替换'];
   out.carryTable = beatIds.slice(1).map((id, index) => ({
     boundary: `${beatIds[index]} → ${id}`,
-    survivor: '持续主体', how: '形态继续演化（同一 DOM 身份）', becomes: '下一形态'
+    survivor: `第 ${index + 1} 个边界留下的持续主体`,
+    method: methods[index % methods.length],
+    detail: `第 ${index + 1} 个边界：持续主体沿第 ${index + 1} 条路径变形并移到 (${200 + index * 60}, ${700 + index * 40})`,
+    becomes: `第 ${index + 1} 个边界的下一形态`
   }));
   return out;
 }

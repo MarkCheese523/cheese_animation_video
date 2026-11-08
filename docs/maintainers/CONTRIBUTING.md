@@ -44,6 +44,8 @@ python -m pip install -r requirements.txt
 - `references/asset-pipeline.md`：素材检索、参考确认和母版确认流程。
 - `references/regression-qa.md`：回归检查要求。
 
+> 本文已移入 `docs/maintainers/`，上面这些路径都相对**仓库根目录**。
+
 ## 三、获取代码
 
 推荐使用 Fork 工作流。以下示例中的 `YOUR_NAME` 替换为你的 GitHub 用户名。
@@ -157,12 +159,34 @@ npm run qa:studio
 
 ```bash
 git diff --check
-git diff -- README.md CONTRIBUTING.md references/
+git diff -- README.md SKILL.md references/ docs/maintainers/
+node scripts/test-doc-contract.mjs
 ```
 
 确认命令可执行、路径存在、没有失效引用。如果文档描述了新的代码行为，还应执行对应测试。
 
 任何测试失败时，先修复再提交 PR；不要以“本地没跑”代替验证结果。
+
+### 文档变更必须同步（硬约束）
+
+这套文档层是执行模型的唯一施工依据。**文档说有、代码没有** 是本仓库最贵的失败模式 ——
+它不报错，只是让人照着一张不存在的表干活。所以改了下面任何一处，就必须同步改另一处：
+
+| 改了 | 必须同步 | 校验 |
+|---|---|---|
+| `assets/template/scenes.js` 的 `SCENE_BUILDERS` | `references/scene-types.md` 的类型清单与 props 字段 | `node scripts/test-scene-types.mjs` |
+| `agent-flow.mjs` 的 `VISUAL_VERBS`，或 `templates/engine.js` 的 helper 名 | `references/visual-verbs.md` | `node scripts/test-doc-contract.mjs` |
+| `references/motion-carry.md` 的承接手法枚举 | `templates/kit/storyboard-contract.js` | `node scripts/test-doc-contract.mjs` |
+| 新增 B 类规则 | 同时提交**校验器实现 + 测试 + `references/rules/` 条目**，三者缺一回归会红 | `node scripts/test-rule-registry.mjs` |
+| `references/rules/*.rule.mjs` 的 `source` 字段 | 指向的文件必须存在、`#锚点` 必须能在该文件里找到标题 | `node scripts/test-doc-contract.mjs` |
+| `references/cases.md` 新增案例 | 必须关联一个已实现的规则编号（`E*`/`C*`）或人工必查编号（`M*`） | `node scripts/test-rule-registry.mjs` |
+| `project.json` 的字段与单位 | `assets/template/project.schema.json` | `node scripts/test-unit-contract.mjs` |
+
+写规则的人要同时写校验器。**只加一条规则、不加校验器，等于没加** ——
+本仓库已经因此让「表D/表E 通过条件」白写了很多期。
+
+`node scripts/test-doc-contract.mjs` 是这层约束的自动执行者：它会检查路径存在性、
+场景类型双向一致、动词三方一致、规则锚点有效，以及 `SKILL.md` 自身的行数、日期戳与命令式措辞密度。
 
 ## 七、提交改动
 

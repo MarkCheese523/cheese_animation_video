@@ -43,4 +43,19 @@ npm run qa:studio        # 整包交接、三次确认、母版和完整预览�
 
 ## 参与开发
 
-所有改动通过独立分支和 Pull Request 提交，禁止直推 `main`，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。本项目采用 [MIT License](LICENSE)。
+所有改动通过独立分支和 Pull Request 提交，禁止直推 `main`，详见 [docs/maintainers/CONTRIBUTING.md](docs/maintainers/CONTRIBUTING.md)。本项目采用 [MIT License](LICENSE)。
+
+## 维护者文档
+
+面向**维护者（人类）**的文档统一收在 [`docs/maintainers/`](docs/maintainers/)，不进入每期执行的 skill 加载路径（`SKILL.md` + `references/**`）：
+
+| 文档 | 回答什么问题 |
+|---|---|
+| [CONTRIBUTING.md](docs/maintainers/CONTRIBUTING.md) | 怎么为这个仓库提 PR？协作硬规则与环境要求是什么？ |
+| [IMPROVEMENT-PLAN.md](docs/maintainers/IMPROVEMENT-PLAN.md) | 下一期从哪里改起？升级为「可执行契约系统」的总纲与路线 |
+| [SKILL-RETROSPECTIVE.md](docs/maintainers/SKILL-RETROSPECTIVE.md) | 上一期为什么返工？26 个缺陷分别归属哪个根因？ |
+| [FLOW-TEST-REPORT.md](docs/maintainers/FLOW-TEST-REPORT.md) | 一次端到端产线走查的完整实证记录 |
+| [SKILL-DIAGNOSIS-vs-v2.md](docs/maintainers/SKILL-DIAGNOSIS-vs-v2.md) | 与纯 skill 标杆 `vertical-explainer-v2` 的横向诊断 |
+| [REPAIR-PLAN.md](docs/maintainers/REPAIR-PLAN.md) | 按诊断落地的分步修复计划与验收标准 |
+
+索引与阅读顺序见 [`docs/maintainers/README.md`](docs/maintainers/README.md)。

@@ -26,7 +26,7 @@
 | 13 | 槽比例想当然 | 默认给竖屏槽，实测 9:16 在大槽内显示效率反而低于 1:1 | contain 模式实测：1:1 字号可视 83% > 9:16 的 52%；按录屏内容选 |
 | 14 | 录屏软件强塞黑边 | 桌面 1:1 录屏导出 9:16，黑边被编码进视频像素，放进槽里上下两块黑补丁 | `slot.fit:"auto"`：播放器 canvas 抽帧检测内容区 → video 元素按内容区等比居中 + cover 裁掉黑边 + torn 背景色 `#f6f4ef` 填充；真 9:16 素材无黑边时自动退回 contain。长期仍建议直接录手机竖屏 |
 | 15 | QA 时长断言硬编码 | 换期后 235.6s 期望值不匹配 149.4s | 动态解析本目录 SRT 末条结束戳 |
-| 16 | `import('./export-video.mjs')` 做「语法检查」 | 脚本顶层自执行，直接启动 headless Chrome 开跑导出 | 语法检查用 `node --check`，禁止 import 可执行脚本 |
+| 16 | `import('./scripts/export.js')` 做「语法检查」 | 脚本顶层自执行，直接启动 headless Chrome 开跑导出 | 语法检查用 `node --check`，禁止 import 可执行脚本 |
 
 ## 协作级（流程教训，比技术坑贵）
 
@@ -42,7 +42,7 @@
 - 配音驱动模式：audio.currentTime 驱动 seekTo，画面严格跟录音走
 - 编辑模式 `?edit=1`：data-edit 点改文案、媒体槽上传录屏（IndexedDB）、导出/导入 JSON 存档（含 base64 录屏，跨浏览器迁移用）
 - 导出默认无配音（Bella 曾在剪映自己对轴），`--audio` 才合入；每期开工时问一句当期要不要合入
-- 交付预览用 `serve.command`（端口 8765），链接交付同时给预览地址和本地路径
+- 交付预览用 `npm run dev -- --host 127.0.0.1 --port 7100`，链接交付同时给预览地址和本地路径
 - 【静态服务缺 MIME 导致 SVG 图裂（2026-10-29 素材确认板实测）】SVG 文件本身完整且页面返回 200，但服务把 `.svg` 当成 `application/octet-stream`，浏览器仍不会按图片渲染。静态服务必须显式配置 `.svg: image/svg+xml`、`.webp: image/webp`、`.jpg/.jpeg: image/jpeg` 等类型；QA 要逐个请求代表性素材并断言 Content-Type，同时用浏览器检查 `img.complete && naturalWidth > 0`。修改服务配置后需重载预览进程，仅刷新页面不会加载新配置。
 - **slot 位置约定（2026-09-18）**：demo 页型的 slot 配在页面根级（`page.slot`），method/ai-paper 配在 `props.slot`——buildXxx 里先做 `page.slot || p.slot` 兼容；配错位置时静默显示 mock 不报错，QA 必须确认录屏槽真的播了视频
 - **slot.crop + slot.zoom（Ken Burns，2026-09-18 新能力）**：`fit:"crop"` 把源视频 crop 区域精确映射到槽内（槽 aspect 配成裁切区比例），`zoom:{t0,t1,from:{x,y,s},to:{x,y,s}}` 页内插值推近。场景：桌面产品全屏录屏内容列只占画面 ~51%，手机上看不清；裁到内容列 + 1.2× 推近，正文可视尺寸近乎翻倍。注意：视频晚于首次 seek 加载时 zoom 会丢，loadeddata 里要补 `applyZoom(lastT)`

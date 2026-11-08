@@ -6,6 +6,12 @@ import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { parseSrt } from './templates/kit/contactsheet.js';
 import { SEM_TAGS } from './templates/kit/master.js';
+/* 表A–F 的校验抽到共享纯函数：设计台路径（本文件）与对话路径
+   （scripts/check-storyboard.mjs）调用同一份，不会再漂移。 */
+import {
+  VISUAL_VERBS, BEAT_COUNT, BEAT_ACTION_PREFERENCE, GENERIC_ACTIONS,
+  cleanBeat, cleanDesignCard, cleanCarryTable
+} from './templates/kit/storyboard-contract.js';
 
 const ROOT = path.resolve('studio/agent-jobs');
 const UPLOADS = path.resolve('studio/agent-inbox');
@@ -14,34 +20,12 @@ const UPLOADS = path.resolve('studio/agent-inbox');
    之前的实现把「五拍」写死（BEAT_IDS + length !== 5），
    结果这一期的偶然结果被当成了通用模板：视频一长，拆解根本写不进去。
    现在只保留两条边界：下限（拍太少撑不起一段完整机制）与上限（太多就没法做承接连续）。 */
-const BEAT_COUNT = { min: 3, max: 40 };
-const BEAT_DURATION = { min: 1, max: 60 };
-/* 画面动作词表 —— 不再按拍 id 绑定。
-   旧的五拍各带两个专属动作，这里保留为「已知拍 id 的优先项」以兼容内置演示，
-   未知拍 id 走通用动作表。 */
-const BEAT_ACTION_PREFERENCE = {
-  gather: ['component-gather', 'logo-reveal'],
-  trigger: ['cursor-click', 'direct-press'],
-  split: ['component-flow', 'card-reflow'],
-  switch: ['state-reflow', 'status-only'],
-  resolve: ['logo-resolve', 'hero-hold']
-};
-const GENERIC_ACTIONS = [
-  'component-gather', 'component-flow', 'state-reflow', 'logo-resolve', 'direct-press',
-  'cursor-click', 'card-reflow', 'status-only', 'logo-reveal', 'hero-hold'
-];
 const MODES = new Set(['generic', 'product']);
 const STYLES = new Set(['cream-neon', 'dark-narrative', 'cheeseheart-tech']);
 const INTENSITIES = new Set(['subtle', 'balanced', 'showreel']);
 const FIDELITIES = new Set(['faithful', 'component', 'abstract']);
 const VISUAL_KINDS = new Set(['generic', 'company', 'institution', 'fund', 'trust', 'voting', 'chair', 'vote']);
 const RESEARCH_ROUTES = new Set(['auto', 'web', 'icon', 'semantic']);
-// 表D 视觉动词表（references/execution-contract.md）：画面动作只能取自这张表，
-// 位移／淡入淡出／缩放／呼吸旋转只是运动手段，不能自己充当叙事动作。
-const VISUAL_VERBS = new Set([
-  '出现', '登场', '落下', '归位', '长成', '展开', '归档', '分出', '注入', '堵住',
-  '滴出', '盖章', '标红', '运转', '停住', '划掉', '计数', '走进', '指向', '提问'
-]);
 const EXTENSIONS = new Set(['.srt', '.txt', '.md', '.json', '.mp3', '.wav', '.m4a', '.png', '.jpg', '.jpeg', '.webp', '.svg', '.mp4', '.mov', '.webm']);
 
 function text(value, fallback = '', limit = 200) {
@@ -165,65 +149,6 @@ export async function createAgentJob(input = {}) {
   return { jobId, status: job.status, prompt: handoffPrompt(jobId, beatPlan), jobUrl: `/studio/agent-jobs/${jobId}/job.json` };
 }
 
-function cleanBeat(beat, index) {
-  const id = text(beat?.id, '', 60).toLowerCase() || `beat-${index + 1}`;
-  if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(id)) throw new Error(`分镜第 ${index + 1} 拍的 id「${id}」不合法（只能用小写字母、数字与连字符）`);
-  const duration = Number(beat.duration);
-  if (!Number.isFinite(duration) || duration < BEAT_DURATION.min || duration > BEAT_DURATION.max) throw new Error(`${id} 时长需在 ${BEAT_DURATION.min}–${BEAT_DURATION.max} 秒之间`);
-  // 两级设计卡的逐句部分：焦点、视觉动词、观众应看懂的关系、声音 cue、跨句承接缺一不可
-  const focus = text(beat.focus, '', 160);
-  /* rule: E01 每拍唯一焦点 */
-  if (!focus) throw new Error(`${id} 缺少本拍唯一焦点（focus）——表D 要求观众此刻只能看一个地方`);
-  const verb = text(beat.verb, '', 20);
-  /* rule: E02 视觉动词必须来自动词表 */
-  if (!VISUAL_VERBS.has(verb)) throw new Error(`${id} 的视觉动词「${verb || '空'}」不在表D 动词表内，只能用：${[...VISUAL_VERBS].join('、')}`);
-  const relation = text(beat.relation, '', 400);
-  if (!relation) throw new Error(`${id} 缺少「观众应看懂的关系」`);
-  const soundCue = text(beat.soundCue, '', 300);
-  if (!soundCue) throw new Error(`${id} 缺少声音 cue`);
-  const carry = text(beat.carry, '', 400);
-  /* rule: E03 每拍必须写清跨句承接 */
-  if (!carry) throw new Error(`${id} 缺少跨句承接说明——同一主体必须跨句继续运动，不能每句换场`);
-  const preference = BEAT_ACTION_PREFERENCE[id] || GENERIC_ACTIONS;
-  return {
-    id, label: text(beat.label, id, 16), duration,
-    action: preference.includes(beat.action) ? beat.action : preference[0],
-    note: text(beat.note, '可见动作与信息增量', 300), narration: text(beat.narration, '', 1000),
-    focus, verb, relation, soundCue, carry,
-    assetIds: Array.isArray(beat.assetIds) ? beat.assetIds.slice(0, 18).map(value => text(value, '', 60)).filter(Boolean) : []
-  };
-}
-
-// 两级设计卡的第一级：按语义段落写视觉母结构 → 形态轨迹 → 起止时间 → 跨句承接 → 静止帧语义
-function cleanDesignCard(card) {
-  const fields = ['motherStructure', 'morphTrack', 'span', 'carry', 'stillFrame'];
-  const out = {};
-  for (const field of fields) {
-    const value = text(card?.[field], '', 800);
-    /* rule: E04 两级设计卡五字段必填 */
-    if (!value) throw new Error(`两级设计卡缺少「${field}」：视觉母结构、形态轨迹、持续时段、跨句承接、静止帧语义必须先写完再进制作`);
-    out[field] = value;
-  }
-  return out;
-}
-
-// 表E 承接表：每个镜头边界都要写清谁活下来、怎么变、变成什么，不允许空行
-function cleanCarryTable(rows, beatIds) {
-  const boundaries = Math.max(0, beatIds.length - 1);
-  if (!Array.isArray(rows) || rows.length !== boundaries) {
-    /* rule: E05 表E 承接表不得有空行 */
-    throw new Error(`表E 承接表必须覆盖 ${boundaries} 个镜头边界（每两个相邻拍之间一行）`);
-  }
-  return rows.map((row, index) => {
-    const survivor = text(row?.survivor, '', 240);
-    const how = text(row?.how, '', 360);
-    const becomes = text(row?.becomes, '', 240);
-    if (!survivor || !how || !becomes) {
-      throw new Error(`表E 承接表第 ${index + 1} 行有空缺：每个边界都要写清谁活下来、怎么变、变成什么`);
-    }
-    return { boundary: text(row?.boundary, '', 80) || `${beatIds[index]} → ${beatIds[index + 1]}`, survivor, how, becomes };
-  });
-}
 function cleanAsset(asset, index) {
   const id = text(asset?.id, '', 60);
   if (!/^[A-Z][A-Z0-9-]*$/.test(id)) throw new Error(`素材 ${index + 1} 缺少稳定大写 ID`);

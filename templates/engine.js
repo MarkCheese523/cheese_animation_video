@@ -112,6 +112,12 @@
     if (el != null && typeof el.setAttribute !== 'function') throw new Error('S: 第一个参数必须是 SVG 元素' + (name ? `(${name})` : ''));
     if (!(t1 > t0)) throw new Error(`S: 时间窗无效 ${t0}–${t1}` + (name ? `(${name})` : ''));
     if (fn != null && typeof fn !== 'function') throw new Error('S: 每帧更新必须是函数' + (name ? `(${name})` : ''));
+    /* 量纲防呆：时间窗超过 600 秒基本是把毫秒写成了秒。不抛错（会打断渲染），
+       只警告一次 —— 静默渲染 3.5 小时比崩溃更难查。规则 E30 / E31。 */
+    if (t1 - t0 > 600 && t1 < 1e6 && typeof console !== 'undefined' && !S.__dimensionWarned) {
+      S.__dimensionWarned = true;
+      console.warn(`[engine] 精灵时间窗 ${t0}–${t1}（跨度 ${(t1 - t0).toFixed(1)} 秒）超过 600 秒 —— 疑似把毫秒写成了秒`);
+    }
     if (el && el.style) el.style.visibility = 'hidden';
     if (el && name) el.setAttribute('data-name', name);
     const sprite = { el, t0, t1, fn };

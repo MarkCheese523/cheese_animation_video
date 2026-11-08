@@ -38,6 +38,12 @@
 | CASE-30 | 若基线可被自动刷新，回归层等于不存在 | 画面合法改动必然与基线不符，基线刷新必须是人工动作而不是产线动作 | `E27` | `scripts/test-visual-regression.mjs` |
 | CASE-31 | 视频一长，Agent 拆解回写直接被拒（「需要 Agent 返回五拍分镜」） | 拍数被写死成五拍 —— 把这一期的偶然结果当成了通用模板 | `E28` | `scripts/test-agent-flow.mjs` |
 | CASE-32 | 拍 id 换成第六种，闸门页面白屏 | 画面动作词表按拍 id 绑定，未知 id 直接取不到值 | `E28` | `scripts/test-studio-gates.mjs` |
+| CASE-34 | 场景类型速查文档化 11 个页型，真实注册的只有 5+1 个，注册表的名字（`SCENE_BUILDERS`）与位置（`scenes.js`）也写错，照文档写配置直接白屏 | 文档与代码之间没有机器核对 —— 类型清单写完就没人再对着注册表校 | `E34` | `scripts/test-scene-types.mjs` |
+
+| CASE-30 | `duration: 12634` 被当成 12634 秒，画面停在三小时之后 | `scenes[].duration` 的单位是【秒】、`scenes[].timing` 的单位是【毫秒】—— 同一个 scene 对象里混着两种单位，而这个区别从来没被写进任何契约，错了也不报错 | `E30` | `scripts/test-unit-contract.mjs` |
+| CASE-35 | 「画法」只能靠现场发明，同一个概念每期画得都不一样 | 全仓库没有「概念 → 画法」的映射表，模型每拍都在即兴发明比喻，于是语义与画面的偏差无人可查 | `E32` | `scripts/test-visual-metaphors.mjs` |
+
+| CASE-33 | 23 行承接表的「怎么变」一字不差全是「主体保持身份，只改变形态与位置」，E03（非空）与 E05（无空行）全部通过，承接设计根本不存在 | 「要求填 N 行自由文本」这种校验形态本身会诱导退化 —— 要 23 行得到 23 行套话，要 6 行才会得到真答案 | `E33` | `scripts/test-storyboard-contract.mjs` |
 
 ## 编号对照
 

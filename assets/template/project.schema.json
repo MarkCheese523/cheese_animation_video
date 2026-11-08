@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cheese-motion.local/schemas/project.schema.json",
+  "title": "Cheese Motion · project.json",
+  "description": "设计台分镜预览器的工程配置。**单位契约**：同一个 scene 对象里混着两种单位 —— scenes[].start 与 scenes[].duration 单位是【秒】，scenes[].timing 的每个值单位是【毫秒】。把毫秒写进 duration 是最常见的静默错误，会让画面停在几小时之后。",
+  "type": "object",
+  "required": ["title", "width", "height", "scenes"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "工程标题"
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "画布宽（像素），竖版固定 1080"
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "画布高（像素），竖版固定 1920"
+    },
+    "audio": {
+      "type": "string",
+      "description": "配音文件（工程内相对路径）；空串表示无声预览"
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/scene" }
+    }
+  },
+  "$defs": {
+    "scene": {
+      "type": "object",
+      "required": ["id", "type", "start", "duration"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "场景 id，小写字母、数字、连字符"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["counter", "flow", "compare", "reveal", "end", "motionSequence"],
+          "description": "场景类型，取值必须来自 assets/template/scenes.js 的 SCENE_BUILDERS 真实键集"
+        },
+        "start": {
+          "type": "number",
+          "minimum": 0,
+          "description": "【单位：秒】该场景在全片中的绝对起点（第一个场景为 0，后续必须与前一场景 start+duration 连续）"
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 600,
+          "description": "【单位：秒】该场景时长。上限 600 是量纲防呆 —— 一段 12 秒的口播写成毫秒（12634）会在这里被拦下"
+        },
+        "timing": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "【单位：毫秒】相对本场景起点的偏移。取值必须落在 [0, duration×1000) 内"
+        },
+        "props": {
+          "type": "object",
+          "description": "场景类型专属参数，字段见 references/scene-types.md"
+        }
+      }
+    }
+  }
+}

@@ -9,13 +9,13 @@
 
 | 级别 | 改了什么 | 回归深度 |
 |---|---|---|
-| **L1 纯数据** | 只改 config.js 的文案、timing、页顺序；subs.js 重新生成 | qa-check 全绿 + **改动页**抽帧目检 |
-| **L2 样式/页型** | theme.css 追加/修改、player.js 加渲染分支、新增页型 | qa-check 全绿 + **全部页**抽帧目检 + 检查共享样式污染 |
-| **L3 引擎/导出** | player.js 时间轴核心、export-video.mjs、qa-check.mjs 本身 | L2 全部 + 真跑一次导出（可只导片段）+ 音效混音验证 |
+| **L1 纯数据** | 只改本期页面的文案、timing、拍顺序；`subs.js` 重新生成 | `npm run validate:motion` 全绿 + **改动段**抽帧目检 |
+| **L2 样式/场景** | `assets/template/player.css` 追加/修改、`assets/template/scenes.js` 加渲染分支、新增场景类型 | L1 全部 + **全部段**抽帧目检 + 检查共享样式污染 |
+| **L3 引擎/导出** | `templates/engine.js` 时间轴核心、`scripts/export.js`、`scripts/qa_frames.py` 本身 | L2 全部 + 真跑一次导出（可只导片段）+ 音效混音验证 |
 
-## 二、自动层（qa-check.mjs，改完就跑）
+## 二、自动层（改完就跑）
 
-`node qa-check.mjs`，全绿才算改完。已覆盖：
+`npm run validate:motion` → `npm run qa:motion` → `npm run qa:semantic` → `npm run qa:visual`，全绿才算改完。已覆盖：
 
 - 每页 ×3 帧无 JS 异常（console error 逐帧收集）
 - 三款字体全部加载（偶发网络字体失败，重跑一次确认不是环境问题）
@@ -25,7 +25,7 @@
 - 导出 UI（?edit=1 工具栏）不进画面
 - 总时长 ≈ SRT 末条时间戳（期望值动态解析，换片自动跟随）
 
-**注意**：qa-check 只证明「没坏」，不证明「好看」。视觉质量靠下面的目检和人工层。
+**注意**：自动层只证明「没坏」，不证明「好看」。视觉质量靠下面的目检和人工层。
 
 ## 三、半自动层（工具产出，人工判读）
 
@@ -33,9 +33,9 @@
    - 文字是否溢出/被裁切/互相遮挡（本次踩过：end-badge 压住金句）
    - 新样式是否污染了别的页（CSS 类是全局共享的，本次踩过：`.ln` 类重名冲突）
    - 槽位比例、花字位置、装饰是否压正文
-2. **timing 边界自查**：每个 timing 值 < 本页 duration。超标元素永远不会出现，且 qa-check 查不出来（踩过：印章超页长）。写 config 时自查，未来可做进 qa-check。
+2. **timing 边界自查**：每个 timing 值 < 本段 duration。超标元素永远不会出现，且自动层查不出来（踩过：印章超页长）。写页面时自查；量纲断言见 `references/scene-types.md` 与 `npm run validate:motion`。
 3. **音效时间点**：预览里把进度条拖到 SFX 事件（如 stamp 130066ms）前后 1 秒，确认触发位置和听感。
-4. **预览全片过一遍**：serve.command 起服务，不开配音用视觉时间轴过一遍节奏，再上传配音对一遍音画。
+4. **预览全片过一遍**：`npm run dev -- --host 127.0.0.1 --port 7100` 起服务，不开配音用视觉时间轴过一遍节奏，再上传配音对一遍音画。
 
 ## 四、人工层（交付前自查清单，模拟验收视角）
 
@@ -55,7 +55,7 @@
 
 ## 五、待自动化（roadmap，按优先级）
 
-1. **timing 边界检查**：解析 config.js，断言每个 timing < 所在页 duration —— 可直接写进 qa-check.mjs
-2. **画面文字 × 字幕重复度检测**：抽取 config 画面文字与 subs.js 做重合比对，整句命中即报红——把 v3 内容规则变成机器可查
+1. **timing 边界检查**：断言每个 timing < 所在段 duration —— 已落地为 `assets/template/project.schema.json` + `npm run validate:motion` 的量纲启发式（E30）
+2. **画面文字 × 字幕重复度检测**：抽取页面画面文字与 `subs.js` 做重合比对，整句命中即报红——把内容规则变成机器可查
 3. ~~**Golden Frames 视觉回归**~~ ✅ 已实现（2026-11-08）：`templates/kit/visual-regression.js` 在固定视口（1080×1920，dsf=1）下用 `renderAt(t)` 重放关键帧，与基线逐像素比对；基线目录 `<任务目录>/baseline-<片段id>/`，刷新基线只能由人验收后手动 `--update`（Agent 不得自行改基线）。比对结果作为**可见状态**写进语义接触表，不自动阻断交付
 4. **关键词长度检查**：画面文字 >8 字自动提醒
