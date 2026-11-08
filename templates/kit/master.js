@@ -85,7 +85,7 @@ export function semOf(slotId, semMap) {
  * 标签不在表内就只能人工确认，不许自由发挥。
  */
 export const SEM_TAGS = new Set([
-  /* 上一期（端侧 AI）的语义标签 */
+  /* 上一期（DeepSeek Super Agent）的语义标签 */
   'server-room', 'compute-module', 'device', 'chip', 'split-module',
   'train-carriage', 'cloud', 'signal-offline', 'privacy-lock', 'latency-clock',
   /* 本期（多任务协调）的语义标签 */

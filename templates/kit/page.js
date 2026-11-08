@@ -36,7 +36,7 @@ html,body{width:100%;height:100%;background:var(--background);overflow:hidden;fo
 body.export #wrap{left:0;top:0;transform:none}body.export #ctrl{display:none}
 `;
 
-const BODY = `
+const BODY = footer => `
 <div id="wrap"><div id="stage">
   <canvas id="bg" width="1080" height="1920"></canvas>
   <svg id="world" width="1080" height="1920" viewBox="0 0 1080 1920">
@@ -50,13 +50,15 @@ const BODY = `
   <div id="subBand"></div><div id="sub"></div>
   <div class="hud-top mono" style="position:absolute;left:70px;right:70px;top:80px;display:flex;justify-content:space-between;font-size:26px;letter-spacing:3px;color:#8fa79b"><div>CHEESE MOTION</div><div id="tc">00:00.00</div></div>
   <div id="prog" style="position:absolute;left:70px;right:70px;top:140px;height:3px;background:rgba(198,255,61,.45)"><i style="display:block;height:100%;width:0;background:#c6ff3d"></i></div>
-  <div class="footer mono">CHEESE MOTION · 端侧 AI</div>
+  <div class="footer mono">${footer}</div>
 </div></div>
 <div id="ctrl"><button id="play">▶ 播放</button><button id="re">⟲ 重播</button><input id="scrub" type="range" step="0.01"><span id="tlabel" class="mono"></span></div>
 `;
 
-/** 生成舞台页面。script 为本期脚本内容，在 kit 与 engine 之后执行。 */
-export function stagePage({ title, script, footer = 'CHEESE MOTION · 端侧 AI', assets = KIT_ASSETS }) {
+/** 生成舞台页面。script 为本期脚本内容，在 kit 与 engine 之后执行。
+ *  footer 是**本页的题材署名**，每期必须传对 ——
+ *  它以前是硬编码的「端侧 AI」，结果每一期、每一帧都印着上一期的题材。 */
+export function stagePage({ title, script, footer = 'CHEESE MOTION', assets = KIT_ASSETS }) {
   const tags = assets.map(src => `<script src="${src}"></script>`).join('\n');
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -67,7 +69,7 @@ export function stagePage({ title, script, footer = 'CHEESE MOTION · 端侧 AI'
 <style>${STYLE}</style>
 </head>
 <body>
-${BODY}
+${BODY(footer)}
 ${tags}
 <script>
 ${script}
